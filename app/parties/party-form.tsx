@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useActionState } from "react" // Next 14/React 18: useFormState from "react-dom"
-import type { PartyFormState } from "@/lib/types"
+import type { FormState } from "@/lib/types"
 
 type Defaults = Partial<{
   type: string; name: string; phone: string; address: string
@@ -14,11 +14,11 @@ export function PartyForm({
   submitLabel,
   defaults,
 }: {
-  action: (state: PartyFormState, formData: FormData) => Promise<PartyFormState>
+  action: (state: FormState, formData: FormData) => Promise<FormState>
   submitLabel: string
   defaults?: Defaults
 }) {
-  const [state, formAction, pending] = useActionState<PartyFormState, FormData>(action, null)
+  const [state, formAction, pending] = useActionState<FormState, FormData>(action, null)
   const fieldErrors = state && !state.ok ? state.fieldErrors : undefined
 
   return (

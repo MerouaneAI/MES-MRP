@@ -8,7 +8,7 @@ import { auth } from "@/auth"
 import { db } from "@/db"
 import { parties } from "@/db/schema/parties"
 import { FACILITY_ID } from "@/lib/constants"
-import type { PartyFormState } from "@/lib/types"
+import type { FormState } from "@/lib/types"
 
 const partySchema = z.object({
   type: z.enum(["customer", "supplier", "both"]),
@@ -49,9 +49,9 @@ function toColumns(v: z.infer<typeof partySchema>) {
 }
 
 export async function createParty(
-  _prev: PartyFormState,
+  _prev: FormState,
   formData: FormData,
-): Promise<PartyFormState> {
+): Promise<FormState> {
   const session = await auth()
   if (!session?.user) return { ok: false, error: "Unauthorized" }
 
@@ -72,9 +72,9 @@ export async function createParty(
 
 export async function updateParty(
   id: string,
-  _prev: PartyFormState,
+  _prev: FormState,
   formData: FormData,
-): Promise<PartyFormState> {
+): Promise<FormState> {
   const session = await auth()
   if (!session?.user) return { ok: false, error: "Unauthorized" }
 

@@ -3,7 +3,7 @@ import { desc } from "drizzle-orm"
 import { db } from "@/db"
 import { parties } from "@/db/schema/parties"
 import { deleteParty } from "@/app/actions/parties"
-import { signOut } from "@/auth"
+import { Nav } from "@/components/nav"
 
 export const dynamic = "force-dynamic"
 
@@ -12,14 +12,10 @@ export default async function PartiesPage() {
 
   return (
     <main style={{ padding: 24 }}>
+      <Nav />
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h1>Parties</h1>
-        <div style={{ display: "flex", gap: 12 }}>
-          <Link href="/parties/new">+ Add party</Link>
-          <form action={async () => { "use server"; await signOut({ redirectTo: "/login" }) }}>
-            <button type="submit">Sign out</button>
-          </form>
-        </div>
+        <Link href="/parties/new">+ Add party</Link>
       </header>
 
       {rows.length === 0 ? (

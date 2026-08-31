@@ -4,6 +4,7 @@ import { db } from "@/db"
 import { parties } from "@/db/schema/parties"
 import { updateParty } from "@/app/actions/parties"
 import { PartyForm } from "../../party-form"
+import { Nav } from "@/components/nav"
 
 export default async function EditPartyPage({
   params,
@@ -18,6 +19,7 @@ export default async function EditPartyPage({
 
   return (
     <main style={{ padding: 24 }}>
+      <Nav />
       <h1>Edit party</h1>
       <PartyForm
         action={action}
