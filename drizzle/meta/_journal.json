@@ -15,6 +15,13 @@
       "when": 1788030069615,
       "tag": "0001_lying_exodus",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788386688011,
+      "tag": "0002_brown_gamma_corps",
+      "breakpoints": true
     }
   ]
 }

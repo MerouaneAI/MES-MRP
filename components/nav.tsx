@@ -7,6 +7,11 @@ const links = [
   { href: "/lots", label: "Inventory" },
   { href: "/purchasing", label: "Purchasing" },
   { href: "/invoices", label: "Invoices" },
+  { href: "/boms", label: "BOMs" },
+  { href: "/eco", label: "ECOs" },
+  { href: "/work-orders", label: "Work Orders" },
+  { href: "/shopfloor", label: "Shop Floor" },
+  { href: "/documents", label: "Documents" },
 ]
 
 export function Nav() {
