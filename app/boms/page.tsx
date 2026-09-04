@@ -4,10 +4,14 @@ import { db } from "@/db"
 import { boms } from "@/db/schema/production"
 import { items } from "@/db/schema/inventory"
 import { Nav } from "@/components/nav"
+import { currentUser } from "@/lib/session"
+import { can } from "@/lib/authz"
 
 export const dynamic = "force-dynamic"
 
 export default async function BomsPage() {
+  const user = await currentUser()
+  const canWrite = !!user && can(user.role, "operator")
   const rows = await db
     .select({ id: boms.id, version: boms.version, status: boms.status, productName: items.name, productSku: items.sku })
     .from(boms)
@@ -19,7 +23,7 @@ export default async function BomsPage() {
       <Nav />
       <header style={{ display: "flex", justifyContent: "space-between" }}>
         <h1>Bills of materials</h1>
-        <Link href="/boms/new">+ New BOM</Link>
+        {canWrite && <Link href="/boms/new">+ New BOM</Link>}
       </header>
       {rows.length === 0 ? <p>No BOMs yet.</p> : (
         <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 16 }}>

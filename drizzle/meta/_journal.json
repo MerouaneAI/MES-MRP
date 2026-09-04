@@ -22,6 +22,13 @@
       "when": 1788386688011,
       "tag": "0002_brown_gamma_corps",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788470133003,
+      "tag": "0003_lively_mathemanic",
+      "breakpoints": true
     }
   ]
 }

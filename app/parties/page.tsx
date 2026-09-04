@@ -4,10 +4,15 @@ import { db } from "@/db"
 import { parties } from "@/db/schema/parties"
 import { deleteParty } from "@/app/actions/parties"
 import { Nav } from "@/components/nav"
+import { currentUser } from "@/lib/session"
+import { can } from "@/lib/authz"
 
 export const dynamic = "force-dynamic"
 
 export default async function PartiesPage() {
+  const user = await currentUser()
+  const canWrite = !!user && can(user.role, "operator")
+  const canDelete = !!user && can(user.role, "admin")
   const rows = await db.select().from(parties).orderBy(desc(parties.createdAt))
 
   return (
@@ -15,7 +20,7 @@ export default async function PartiesPage() {
       <Nav />
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h1>Parties</h1>
-        <Link href="/parties/new">+ Add party</Link>
+        {canWrite && <Link href="/parties/new">+ Add party</Link>}
       </header>
 
       {rows.length === 0 ? (
@@ -36,11 +41,13 @@ export default async function PartiesPage() {
                 <td>{p.phone ?? "—"}</td>
                 <td>{p.nif ?? "—"}</td>
                 <td style={{ display: "flex", gap: 8 }}>
-                  <Link href={`/parties/${p.id}/edit`}>Edit</Link>
-                  <form action={deleteParty}>
-                    <input type="hidden" name="id" value={p.id} />
-                    <button type="submit">Delete</button>
-                  </form>
+                  {canWrite && <Link href={`/parties/${p.id}/edit`}>Edit</Link>}
+                  {canDelete && (
+                    <form action={deleteParty}>
+                      <input type="hidden" name="id" value={p.id} />
+                      <button type="submit">Delete</button>
+                    </form>
+                  )}
                 </td>
               </tr>
             ))}

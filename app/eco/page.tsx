@@ -5,10 +5,14 @@ import { engineeringChangeOrders, boms } from "@/db/schema/production"
 import { items } from "@/db/schema/inventory"
 import { applyEco, cancelEco } from "@/app/actions/eco"
 import { Nav } from "@/components/nav"
+import { currentUser } from "@/lib/session"
+import { can } from "@/lib/authz"
 
 export const dynamic = "force-dynamic"
 
 export default async function EcoPage() {
+  const user = await currentUser()
+  const isAdmin = !!user && can(user.role, "admin")
   const rows = await db
     .select({
       id: engineeringChangeOrders.id,
@@ -27,7 +31,7 @@ export default async function EcoPage() {
       <Nav />
       <header style={{ display: "flex", justifyContent: "space-between" }}>
         <h1>Engineering change orders</h1>
-        <Link href="/eco/new">+ New ECO</Link>
+        {isAdmin && <Link href="/eco/new">+ New ECO</Link>}
       </header>
       {rows.length === 0 ? <p>No ECOs yet.</p> : (
         <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 16 }}>
@@ -40,7 +44,7 @@ export default async function EcoPage() {
                 <td>{e.reason}</td>
                 <td>{e.status}</td>
                 <td style={{ display: "flex", gap: 8 }}>
-                  {e.status === "draft" && (
+                  {e.status === "draft" && isAdmin && (
                     <>
                       <form action={applyEco}>
                         <input type="hidden" name="ecoId" value={e.id} />

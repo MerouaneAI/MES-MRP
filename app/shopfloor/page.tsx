@@ -5,10 +5,15 @@ import { items } from "@/db/schema/inventory"
 import { Nav } from "@/components/nav"
 import { DispatchBoardLive } from "./dispatch-board-live"
 import { ScanForm } from "./scan-form"
+import { currentUser } from "@/lib/session"
+import { can } from "@/lib/authz"
 
 export const dynamic = "force-dynamic"
 
 export default async function ShopFloorPage() {
+  const user = await currentUser()
+  const canWrite = !!user && can(user.role, "operator")
+
   // The board = everything currently released (on the floor).
   const released = await db
     .select({
@@ -63,7 +68,7 @@ export default async function ShopFloorPage() {
         </div>
       )}
 
-      <ScanForm />
+      {canWrite && <ScanForm />}
     </main>
   )
 }

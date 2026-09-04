@@ -4,6 +4,8 @@ import { db } from "@/db"
 import { lots, items } from "@/db/schema/inventory"
 import { deleteLot } from "@/app/actions/lots"
 import { Nav } from "@/components/nav"
+import { currentUser } from "@/lib/session"
+import { can } from "@/lib/authz"
 
 export const dynamic = "force-dynamic"
 
@@ -17,6 +19,9 @@ function expiryBadge(expiresAt: string | null) {
 }
 
 export default async function LotsPage() {
+  const user = await currentUser()
+  const canWrite = !!user && can(user.role, "operator")
+  const canDelete = !!user && can(user.role, "admin")
   // FEFO: earliest expiry first. Postgres sorts NULLs LAST on ASC, so no-expiry
   // lots are consumed last — exactly what we want.
   const rows = await db
@@ -38,7 +43,7 @@ export default async function LotsPage() {
       <Nav />
       <header style={{ display: "flex", justifyContent: "space-between" }}>
         <h1>Inventory (lots)</h1>
-        <Link href="/lots/new">+ Add lot</Link>
+        {canWrite && <Link href="/lots/new">+ Add lot</Link>}
       </header>
       {rows.length === 0 ? <p>No lots yet.</p> : (
         <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 16 }}>
@@ -53,11 +58,13 @@ export default async function LotsPage() {
                   <td align="right">{l.quantityOnHand} {l.unit}</td>
                   <td style={{ color: badge.color }}>{badge.label}</td>
                   <td style={{ display: "flex", gap: 8 }}>
-                    <Link href={`/lots/${l.id}/edit`}>Edit</Link>
-                    <form action={deleteLot}>
-                      <input type="hidden" name="id" value={l.id} />
-                      <button type="submit">Delete</button>
-                    </form>
+                    {canWrite && <Link href={`/lots/${l.id}/edit`}>Edit</Link>}
+                    {canDelete && (
+                      <form action={deleteLot}>
+                        <input type="hidden" name="id" value={l.id} />
+                        <button type="submit">Delete</button>
+                      </form>
+                    )}
                   </td>
                 </tr>
               )

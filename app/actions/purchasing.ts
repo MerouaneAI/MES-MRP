@@ -4,12 +4,13 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { and, eq } from "drizzle-orm"
 import { z } from "zod"
-import { auth } from "@/auth"
+import { authorize } from "@/lib/authz"
 import { db } from "@/db"
 import { purchaseOrders, purchaseOrderLines } from "@/db/schema/purchases"
 import { items, lots } from "@/db/schema/inventory"
 import { FACILITY_ID } from "@/lib/constants"
 import { addMoney, multiplyMoney } from "@/lib/money"
+import { recordAudit } from "@/lib/audit"
 import type { FormState } from "@/lib/types"
 
 // ---------- Create the PO header ----------
@@ -19,8 +20,8 @@ const poSchema = z.object({
 })
 
 export async function createPurchaseOrder(_prev: FormState, formData: FormData): Promise<FormState> {
-  const session = await auth()
-  if (!session?.user) return { ok: false, error: "Unauthorized" }
+  const gate = await authorize("operator")
+  if (!gate.ok) return gate
 
   const parsed = poSchema.safeParse({
     supplierId: formData.get("supplierId"),
@@ -50,8 +51,8 @@ const lineSchema = z.object({
 })
 
 export async function addPurchaseOrderLine(poId: string, _prev: FormState, formData: FormData): Promise<FormState> {
-  const session = await auth()
-  if (!session?.user) return { ok: false, error: "Unauthorized" }
+  const gate = await authorize("operator")
+  if (!gate.ok) return gate
 
   const parsed = lineSchema.safeParse({
     itemId: formData.get("itemId"),
@@ -89,8 +90,8 @@ export async function addPurchaseOrderLine(poId: string, _prev: FormState, formD
 }
 
 export async function removePurchaseOrderLine(formData: FormData): Promise<void> {
-  const session = await auth()
-  if (!session?.user) throw new Error("Unauthorized")
+  const gate = await authorize("operator")
+  if (!gate.ok) throw new Error(gate.error)
 
   const lineId = String(formData.get("lineId") ?? "")
   const poId = String(formData.get("poId") ?? "")
@@ -110,8 +111,8 @@ export async function removePurchaseOrderLine(formData: FormData): Promise<void>
 
 // ---------- State machine: draft -> ordered -> received ----------
 export async function markOrdered(formData: FormData): Promise<void> {
-  const session = await auth()
-  if (!session?.user) throw new Error("Unauthorized")
+  const gate = await authorize("operator")
+  if (!gate.ok) throw new Error(gate.error)
 
   const poId = String(formData.get("poId") ?? "")
   if (!poId) return
@@ -127,8 +128,8 @@ export async function markOrdered(formData: FormData): Promise<void> {
 
 // The important one: receiving CREATES inventory lots, transactionally + idempotently.
 export async function receivePurchaseOrder(formData: FormData): Promise<void> {
-  const session = await auth()
-  if (!session?.user) throw new Error("Unauthorized")
+  const gate = await authorize("operator")
+  if (!gate.ok) throw new Error(gate.error)
 
   const poId = String(formData.get("poId") ?? "")
   if (!poId) return
@@ -160,6 +161,11 @@ export async function receivePurchaseOrder(formData: FormData): Promise<void> {
         sourcePoId: po.id,
       })
     }
+
+    await recordAudit(tx, {
+      user: gate.user, action: "purchase_order.receive", entity: "purchase_order", entityId: poId,
+      summary: `Received PO ${poId.slice(0, 8)} — created ${lines.length} lot(s)`,
+    })
   })
 
   revalidatePath("/purchasing")

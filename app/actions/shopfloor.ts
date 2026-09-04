@@ -1,14 +1,14 @@
 "use server"
 
 import { eq } from "drizzle-orm"
-import { auth } from "@/auth"
+import { authorize } from "@/lib/authz"
 import { db } from "@/db"
 import { items, lots } from "@/db/schema/inventory"
 import type { ScanResult } from "@/lib/types"
 
 export async function scanBarcode(_prev: ScanResult | null, formData: FormData): Promise<ScanResult> {
-  const session = await auth()
-  if (!session?.user) return { ok: false, error: "Unauthorized" }
+  const gate = await authorize("operator")
+  if (!gate.ok) return { ok: false, error: gate.error }
 
   const code = String(formData.get("code") ?? "").trim()
   if (!code) return { ok: false, error: "Scan or type a code." }

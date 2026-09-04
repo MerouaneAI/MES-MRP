@@ -4,10 +4,11 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { sql } from "drizzle-orm"
 import { z } from "zod"
-import { auth } from "@/auth"
+import { authorize } from "@/lib/authz"
 import { db } from "@/db"
 import { invoiceCounters, invoices } from "@/db/schema/invoices"
 import { FACILITY_ID } from "@/lib/constants"
+import { recordAudit } from "@/lib/audit"
 import type { FormState } from "@/lib/types"
 
 // Core: atomic, gapless invoice number. Reusable by actions, tests, and BullMQ.
@@ -54,8 +55,8 @@ const invoiceSchema = z.object({
 })
 
 export async function createInvoice(_prev: FormState, formData: FormData): Promise<FormState> {
-  const session = await auth()
-  if (!session?.user) return { ok: false, error: "Unauthorized" }
+  const gate = await authorize("operator")
+  if (!gate.ok) return gate
 
   const parsed = invoiceSchema.safeParse({
     partyId: formData.get("partyId"),
@@ -65,7 +66,11 @@ export async function createInvoice(_prev: FormState, formData: FormData): Promi
     return { ok: false, error: "Please fix the errors below.", fieldErrors: parsed.error.flatten().fieldErrors }
   }
 
-  await createInvoiceRecord({ partyId: parsed.data.partyId, totalAmount: parsed.data.totalAmount })
+  const row = await createInvoiceRecord({ partyId: parsed.data.partyId, totalAmount: parsed.data.totalAmount })
+  await recordAudit(db, {
+    user: gate.user, action: "invoice.create", entity: "invoice", entityId: row.id,
+    summary: `Issued invoice ${row.invoiceNo} for ${row.totalAmount} DZD`,
+  })
 
   revalidatePath("/invoices")
   redirect("/invoices")

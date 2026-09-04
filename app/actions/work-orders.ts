@@ -4,13 +4,14 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { and, eq, inArray, sql } from "drizzle-orm"
 import { z } from "zod"
-import { auth } from "@/auth"
+import { authorize } from "@/lib/authz"
 import { db } from "@/db"
 import { boms, workOrders, workOrderMaterials } from "@/db/schema/production"
 import { items, lots, lotGenealogy } from "@/db/schema/inventory"
 import { FACILITY_ID } from "@/lib/constants"
 import { allocateFefo, checkAvailability, checkCapacity, explodeBom } from "@/lib/mrp"
 import { publishShopFloorEvent } from "@/lib/shopfloor"
+import { recordAudit } from "@/lib/audit"
 import type { FormState } from "@/lib/types"
 
 // ---------- Create (status = planned, snapshot the active BOM) ----------
@@ -22,8 +23,8 @@ const woSchema = z.object({
 })
 
 export async function createWorkOrder(_prev: FormState, formData: FormData): Promise<FormState> {
-  const session = await auth()
-  if (!session?.user) return { ok: false, error: "Unauthorized" }
+  const gate = await authorize("operator")
+  if (!gate.ok) return gate
 
   const parsed = woSchema.safeParse({
     productItemId: formData.get("productItemId"),
@@ -55,8 +56,8 @@ export async function createWorkOrder(_prev: FormState, formData: FormData): Pro
 
 // ---------- Release: run MRP, validate, snapshot requirements ----------
 export async function releaseWorkOrder(workOrderId: string, _prev: FormState, _formData: FormData): Promise<FormState> {
-  const session = await auth()
-  if (!session?.user) return { ok: false, error: "Unauthorized" }
+  const gate = await authorize("operator")
+  if (!gate.ok) return gate
 
   try {
     await db.transaction(async (tx) => {
@@ -101,8 +102,8 @@ export async function releaseWorkOrder(workOrderId: string, _prev: FormState, _f
 
 // ---------- Complete: the crown jewel (atomic + idempotent) ----------
 export async function completeWorkOrder(workOrderId: string, _prev: FormState, _formData: FormData): Promise<FormState> {
-  const session = await auth()
-  if (!session?.user) return { ok: false, error: "Unauthorized" }
+  const gate = await authorize("operator")
+  if (!gate.ok) return gate
 
   try {
     await db.transaction(async (tx) => {
@@ -149,6 +150,11 @@ export async function completeWorkOrder(workOrderId: string, _prev: FormState, _
       await tx.update(workOrders)
         .set({ quantityProduced: wo.quantityPlanned, outputLotId: outputLot.id })
         .where(eq(workOrders.id, workOrderId))
+
+      await recordAudit(tx, {
+        user: gate.user, action: "work_order.complete", entity: "work_order", entityId: workOrderId,
+        summary: `Completed WO ${workOrderId.slice(0, 8)} → output lot ${outputLot.id.slice(0, 8)}`,
+      })
     })
   } catch (e) {
     // Any shortage/error rolls back the WHOLE transaction — WO stays released.
@@ -165,8 +171,8 @@ export async function completeWorkOrder(workOrderId: string, _prev: FormState, _
 
 // ---------- Cancel (only before completion; nothing consumed yet) ----------
 export async function cancelWorkOrder(formData: FormData): Promise<void> {
-  const session = await auth()
-  if (!session?.user) throw new Error("Unauthorized")
+  const gate = await authorize("operator")
+  if (!gate.ok) throw new Error(gate.error)
 
   const workOrderId = String(formData.get("workOrderId") ?? "")
   if (!workOrderId) return

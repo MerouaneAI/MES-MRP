@@ -3,10 +3,12 @@ import { describe, it, expect, vi } from "vitest"
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }))
-vi.mock("@/auth", () => ({ auth: vi.fn(async () => ({ user: { id: "test", role: "admin" } })) }))
+vi.mock("@/lib/authz", () => ({
+  authorize: vi.fn(async () => ({ ok: true, user: { id: "test", email: "t@t.com", role: "admin" } })),
+}))
 
 import { createItem } from "@/app/actions/items"
-import { auth } from "@/auth"
+import { authorize } from "@/lib/authz"
 import { redirect } from "next/navigation"
 import { db } from "@/db"
 import { items } from "@/db/schema/inventory"
@@ -25,7 +27,7 @@ describe("createItem", () => {
   })
 
   it("rejects when unauthenticated", async () => {
-    vi.mocked(auth).mockResolvedValueOnce(null as any)
+    vi.mocked(authorize).mockResolvedValueOnce({ ok: false, error: "Unauthorized" })
     const res = await createItem(null, fd({ kind: "raw_material", sku: "RM-X", name: "X", unit: "kg" }))
     expect(res).toEqual({ ok: false, error: "Unauthorized" })
   })

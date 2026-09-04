@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { and, eq, sql } from "drizzle-orm"
 import { z } from "zod"
-import { auth } from "@/auth"
+import { authorize } from "@/lib/authz"
 import { db } from "@/db"
 import { boms, bomLines } from "@/db/schema/production"
 import { FACILITY_ID } from "@/lib/constants"
@@ -17,8 +17,8 @@ const bomSchema = z.object({
 })
 
 export async function createBom(_prev: FormState, formData: FormData): Promise<FormState> {
-  const session = await auth()
-  if (!session?.user) return { ok: false, error: "Unauthorized" }
+  const gate = await authorize("operator")
+  if (!gate.ok) return gate
 
   const parsed = bomSchema.safeParse({
     productItemId: formData.get("productItemId"),
@@ -55,8 +55,8 @@ const lineSchema = z.object({
 })
 
 export async function addBomLine(bomId: string, _prev: FormState, formData: FormData): Promise<FormState> {
-  const session = await auth()
-  if (!session?.user) return { ok: false, error: "Unauthorized" }
+  const gate = await authorize("operator")
+  if (!gate.ok) return gate
 
   const parsed = lineSchema.safeParse({
     componentItemId: formData.get("componentItemId"),
@@ -82,8 +82,8 @@ export async function addBomLine(bomId: string, _prev: FormState, formData: Form
 }
 
 export async function removeBomLine(formData: FormData): Promise<void> {
-  const session = await auth()
-  if (!session?.user) throw new Error("Unauthorized")
+  const gate = await authorize("operator")
+  if (!gate.ok) throw new Error(gate.error)
 
   const lineId = String(formData.get("lineId") ?? "")
   const bomId = String(formData.get("bomId") ?? "")
@@ -99,8 +99,8 @@ export async function removeBomLine(formData: FormData): Promise<void> {
 // Activate a DRAFT BOM. Only for the FIRST version (no active exists yet).
 // Changing an already-active recipe must go through an ECO.
 export async function activateBom(formData: FormData): Promise<void> {
-  const session = await auth()
-  if (!session?.user) throw new Error("Unauthorized")
+  const gate = await authorize("admin", { fresh: true })
+  if (!gate.ok) throw new Error(gate.error)
 
   const bomId = String(formData.get("bomId") ?? "")
   if (!bomId) return

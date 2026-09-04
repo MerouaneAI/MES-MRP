@@ -4,10 +4,14 @@ import { db } from "@/db"
 import { workOrders } from "@/db/schema/production"
 import { items } from "@/db/schema/inventory"
 import { Nav } from "@/components/nav"
+import { currentUser } from "@/lib/session"
+import { can } from "@/lib/authz"
 
 export const dynamic = "force-dynamic"
 
 export default async function WorkOrdersPage() {
+  const user = await currentUser()
+  const canWrite = !!user && can(user.role, "operator")
   const rows = await db
     .select({
       id: workOrders.id, status: workOrders.status,
@@ -23,7 +27,7 @@ export default async function WorkOrdersPage() {
       <Nav />
       <header style={{ display: "flex", justifyContent: "space-between" }}>
         <h1>Work orders</h1>
-        <Link href="/work-orders/new">+ New work order</Link>
+        {canWrite && <Link href="/work-orders/new">+ New work order</Link>}
       </header>
       {rows.length === 0 ? <p>No work orders yet.</p> : (
         <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 16 }}>

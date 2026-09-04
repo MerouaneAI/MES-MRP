@@ -2,7 +2,9 @@ import "dotenv/config"
 import { describe, it, expect, vi, afterAll } from "vitest"
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
-vi.mock("@/auth", () => ({ auth: vi.fn(async () => ({ user: { id: "test", role: "admin" } })) }))
+vi.mock("@/lib/authz", () => ({
+  authorize: vi.fn(async () => ({ ok: true, user: { id: "test", email: "t@t.com", role: "admin" } })),
+}))
 
 const add = vi.fn(async () => ({}))
 vi.mock("@/lib/queue", () => ({ documentsQueue: { add: (...a: unknown[]) => add(...a) }, DOCUMENTS_QUEUE: "documents" }))

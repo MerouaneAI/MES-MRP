@@ -6,12 +6,6 @@ export async function proxy(request: NextRequest) {
   const session = await auth()
 
   const isLoginPage = request.nextUrl.pathname === "/login"
-  const isAuthApi = request.nextUrl.pathname.startsWith("/api/auth")
-
-  // Allow auth API routes to pass through
-  if (isAuthApi) {
-    return NextResponse.next()
-  }
 
   // Redirect unauthenticated users to login
   if (!session) {
@@ -28,5 +22,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)"],
+  matcher: ["/((?!api/auth|api/health|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)"],
 }

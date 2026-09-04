@@ -4,12 +4,12 @@ import { describe, it, expect, vi } from "vitest"
 // Mock Next runtime + auth BEFORE importing the actions.
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }))
-vi.mock("@/auth", () => ({
-  auth: vi.fn(async () => ({ user: { id: "test", role: "admin" } })),
+vi.mock("@/lib/authz", () => ({
+  authorize: vi.fn(async () => ({ ok: true, user: { id: "test", email: "t@t.com", role: "admin" } })),
 }))
 
 import { createParty, deleteParty } from "@/app/actions/parties"
-import { auth } from "@/auth"
+import { authorize } from "@/lib/authz"
 import { redirect } from "next/navigation"
 import { db } from "@/db"
 import { parties } from "@/db/schema/parties"
@@ -28,7 +28,7 @@ describe("createParty", () => {
   })
 
   it("returns Unauthorized when there is no session", async () => {
-    vi.mocked(auth).mockResolvedValueOnce(null as any)
+    vi.mocked(authorize).mockResolvedValueOnce({ ok: false, error: "Unauthorized" })
     const res = await createParty(null, fd({ type: "supplier", name: "Nope Co" }))
     expect(res).toEqual({ ok: false, error: "Unauthorized" })
   })

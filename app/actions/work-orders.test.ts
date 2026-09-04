@@ -3,7 +3,9 @@ import { describe, it, expect, vi, afterEach } from "vitest"
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }))
-vi.mock("@/auth", () => ({ auth: vi.fn(async () => ({ user: { id: "test", role: "admin" } })) }))
+vi.mock("@/lib/authz", () => ({
+  authorize: vi.fn(async () => ({ ok: true, user: { id: "00000000-0000-0000-0000-000000000099", email: "t@t.com", role: "admin" } })),
+}))
 vi.mock("@/lib/shopfloor", () => ({ publishShopFloorEvent: vi.fn() })) // no Redis needed
 
 import { releaseWorkOrder, completeWorkOrder } from "@/app/actions/work-orders"

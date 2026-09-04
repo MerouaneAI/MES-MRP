@@ -5,10 +5,14 @@ import { purchaseOrders } from "@/db/schema/purchases"
 import { lots } from "@/db/schema/inventory"
 import { enqueuePoPdf, enqueueCoaPdf } from "@/app/actions/documents"
 import { Nav } from "@/components/nav"
+import { currentUser } from "@/lib/session"
+import { can } from "@/lib/authz"
 
 export const dynamic = "force-dynamic"
 
 export default async function DocumentsPage() {
+  const user = await currentUser()
+  const canWrite = !!user && can(user.role, "operator")
   const docs = await db.select().from(documents).orderBy(desc(documents.createdAt))
   const poOptions = await db.select({ id: purchaseOrders.id }).from(purchaseOrders).orderBy(desc(purchaseOrders.createdAt))
   const lotOptions = await db.select({ id: lots.id, lotNumber: lots.lotNumber }).from(lots).orderBy(asc(lots.lotNumber))
@@ -18,27 +22,29 @@ export default async function DocumentsPage() {
       <Nav />
       <h1>Documents</h1>
 
-      <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginBottom: 24 }}>
-        <form action={enqueuePoPdf} style={{ display: "flex", gap: 8, alignItems: "end" }}>
-          <label>PO PDF
-            <select name="poId" required defaultValue="">
-              <option value="" disabled>Choose PO…</option>
-              {poOptions.map((p) => <option key={p.id} value={p.id}>{p.id.slice(0, 8)}</option>)}
-            </select>
-          </label>
-          <button type="submit">Generate PO PDF</button>
-        </form>
+      {canWrite && (
+        <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginBottom: 24 }}>
+          <form action={enqueuePoPdf} style={{ display: "flex", gap: 8, alignItems: "end" }}>
+            <label>PO PDF
+              <select name="poId" required defaultValue="">
+                <option value="" disabled>Choose PO…</option>
+                {poOptions.map((p) => <option key={p.id} value={p.id}>{p.id.slice(0, 8)}</option>)}
+              </select>
+            </label>
+            <button type="submit">Generate PO PDF</button>
+          </form>
 
-        <form action={enqueueCoaPdf} style={{ display: "flex", gap: 8, alignItems: "end" }}>
-          <label>CoA PDF
-            <select name="lotId" required defaultValue="">
-              <option value="" disabled>Choose lot…</option>
-              {lotOptions.map((l) => <option key={l.id} value={l.id}>{l.lotNumber}</option>)}
-            </select>
-          </label>
-          <button type="submit">Generate CoA PDF</button>
-        </form>
-      </div>
+          <form action={enqueueCoaPdf} style={{ display: "flex", gap: 8, alignItems: "end" }}>
+            <label>CoA PDF
+              <select name="lotId" required defaultValue="">
+                <option value="" disabled>Choose lot…</option>
+                {lotOptions.map((l) => <option key={l.id} value={l.id}>{l.lotNumber}</option>)}
+              </select>
+            </label>
+            <button type="submit">Generate CoA PDF</button>
+          </form>
+        </div>
+      )}
 
       {docs.length === 0 ? <p>No documents yet. Generate one above.</p> : (
         <table cellPadding={8} style={{ borderCollapse: "collapse" }}>

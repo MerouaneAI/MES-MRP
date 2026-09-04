@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { eq } from "drizzle-orm"
 import { z } from "zod"
-import { auth } from "@/auth"
+import { authorize } from "@/lib/authz"
 import { db } from "@/db"
 import { parties } from "@/db/schema/parties"
 import { FACILITY_ID } from "@/lib/constants"
@@ -52,8 +52,8 @@ export async function createParty(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  const session = await auth()
-  if (!session?.user) return { ok: false, error: "Unauthorized" }
+  const gate = await authorize("operator")
+  if (!gate.ok) return gate
 
   const parsed = parsePartyForm(formData)
   if (!parsed.success) {
@@ -75,8 +75,8 @@ export async function updateParty(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  const session = await auth()
-  if (!session?.user) return { ok: false, error: "Unauthorized" }
+  const gate = await authorize("operator")
+  if (!gate.ok) return gate
 
   const parsed = parsePartyForm(formData)
   if (!parsed.success) {
@@ -94,8 +94,8 @@ export async function updateParty(
 }
 
 export async function deleteParty(formData: FormData): Promise<void> {
-  const session = await auth()
-  if (!session?.user) throw new Error("Unauthorized")
+  const gate = await authorize("admin")
+  if (!gate.ok) throw new Error(gate.error)
 
   const id = String(formData.get("id") ?? "")
   if (!id) return

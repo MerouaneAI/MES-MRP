@@ -5,10 +5,14 @@ import { db } from "@/db"
 import { invoices } from "@/db/schema/invoices"
 import { parties } from "@/db/schema/parties"
 import { Nav } from "@/components/nav"
+import { currentUser } from "@/lib/session"
+import { can } from "@/lib/authz"
 
 export const dynamic = "force-dynamic"
 
 export default async function InvoicesPage() {
+  const user = await currentUser()
+  const canWrite = !!user && can(user.role, "operator")
   const rows = await db
     .select({
       id: invoices.id,
@@ -26,7 +30,7 @@ export default async function InvoicesPage() {
       <Nav />
       <header style={{ display: "flex", justifyContent: "space-between" }}>
         <h1>Invoices</h1>
-        <Link href="/invoices/new">+ New invoice</Link>
+        {canWrite && <Link href="/invoices/new">+ New invoice</Link>}
       </header>
       {/* No edit/delete links: invoices are immutable by design. */}
       {rows.length === 0 ? <p>No invoices yet.</p> : (

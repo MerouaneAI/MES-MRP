@@ -4,10 +4,11 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { and, eq } from "drizzle-orm"
 import { z } from "zod"
-import { auth } from "@/auth"
+import { authorize } from "@/lib/authz"
 import { db } from "@/db"
 import { boms, engineeringChangeOrders } from "@/db/schema/production"
 import { FACILITY_ID } from "@/lib/constants"
+import { recordAudit } from "@/lib/audit"
 import type { FormState } from "@/lib/types"
 
 const ecoSchema = z.object({
@@ -17,8 +18,8 @@ const ecoSchema = z.object({
 })
 
 export async function createEco(_prev: FormState, formData: FormData): Promise<FormState> {
-  const session = await auth()
-  if (!session?.user) return { ok: false, error: "Unauthorized" }
+  const gate = await authorize("admin", { fresh: true })
+  if (!gate.ok) return gate
 
   const parsed = ecoSchema.safeParse({
     productItemId: formData.get("productItemId"),
@@ -53,8 +54,8 @@ export async function createEco(_prev: FormState, formData: FormData): Promise<F
 // Apply: archive the current active version and activate the target, atomically.
 // The conditional flip on the ECO row makes it idempotent.
 export async function applyEco(formData: FormData): Promise<void> {
-  const session = await auth()
-  if (!session?.user) throw new Error("Unauthorized")
+  const gate = await authorize("admin", { fresh: true })
+  if (!gate.ok) throw new Error(gate.error)
 
   const ecoId = String(formData.get("ecoId") ?? "")
   if (!ecoId) return
@@ -69,6 +70,11 @@ export async function applyEco(formData: FormData): Promise<void> {
     await tx.update(boms).set({ status: "archived" })
       .where(and(eq(boms.productItemId, eco.productItemId), eq(boms.status, "active")))
     await tx.update(boms).set({ status: "active" }).where(eq(boms.id, eco.toBomId))
+
+    await recordAudit(tx, {
+      user: gate.user, action: "eco.apply", entity: "eco", entityId: ecoId,
+      summary: `Applied ECO ${ecoId.slice(0, 8)} — activated BOM ${eco.toBomId.slice(0, 8)}`,
+    })
   })
 
   revalidatePath("/eco")
@@ -76,8 +82,8 @@ export async function applyEco(formData: FormData): Promise<void> {
 }
 
 export async function cancelEco(formData: FormData): Promise<void> {
-  const session = await auth()
-  if (!session?.user) throw new Error("Unauthorized")
+  const gate = await authorize("admin", { fresh: true })
+  if (!gate.ok) throw new Error(gate.error)
 
   const ecoId = String(formData.get("ecoId") ?? "")
   if (!ecoId) return
