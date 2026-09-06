@@ -2,6 +2,7 @@ import { asc, inArray } from "drizzle-orm"
 import { db } from "@/db"
 import { items } from "@/db/schema/inventory"
 import { NewBomForm } from "./new-bom-form"
+import { PageHeader } from "@/components/ui/page-header"
 
 export const dynamic = "force-dynamic"
 
@@ -15,7 +16,7 @@ export default async function NewBomPage() {
 
   return (
     <div className="space-y-6">
-      <h1>New BOM</h1>
+      <PageHeader title="New BOM" />
       <NewBomForm products={products} />
     </div>
   )

@@ -5,6 +5,7 @@ import { db } from "@/db"
 import { items } from "@/db/schema/inventory"
 import { updateItem } from "@/app/actions/items"
 import { ItemForm } from "../../item-form"
+import { PageHeader } from "@/components/ui/page-header"
 
 export default async function EditItemPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -15,7 +16,7 @@ export default async function EditItemPage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="space-y-6">
-      <h1>Edit item</h1>
+      <PageHeader title="Edit item" />
       <ItemForm
         action={action}
         submitLabel="Save changes"

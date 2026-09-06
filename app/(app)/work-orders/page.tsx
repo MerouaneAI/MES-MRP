@@ -5,6 +5,8 @@ import { workOrders } from "@/db/schema/production"
 import { items } from "@/db/schema/inventory"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
+import { PageHeader } from "@/components/ui/page-header"
+import { buttonClass } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
 
@@ -23,10 +25,10 @@ export default async function WorkOrdersPage() {
 
   return (
     <div className="space-y-6">
-      <header style={{ display: "flex", justifyContent: "space-between" }}>
-        <h1>Work orders</h1>
-        {canWrite && <Link href="/work-orders/new">+ New work order</Link>}
-      </header>
+      <PageHeader
+        title="Work orders"
+        actions={canWrite ? <Link href="/work-orders/new" className={buttonClass()}>+ New work order</Link> : undefined}
+      />
       {rows.length === 0 ? <p>No work orders yet.</p> : (
         <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 16 }}>
           <thead><tr><th align="left">Product</th><th align="left">Status</th><th align="right">Planned</th><th align="right">Produced</th><th /></tr></thead>

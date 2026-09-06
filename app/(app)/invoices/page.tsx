@@ -6,6 +6,8 @@ import { invoices } from "@/db/schema/invoices"
 import { parties } from "@/db/schema/parties"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
+import { PageHeader } from "@/components/ui/page-header"
+import { buttonClass } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
 
@@ -26,10 +28,10 @@ export default async function InvoicesPage() {
 
   return (
     <div className="space-y-6">
-      <header style={{ display: "flex", justifyContent: "space-between" }}>
-        <h1>Invoices</h1>
-        {canWrite && <Link href="/invoices/new">+ New invoice</Link>}
-      </header>
+      <PageHeader
+        title="Invoices"
+        actions={canWrite ? <Link href="/invoices/new" className={buttonClass()}>+ New invoice</Link> : undefined}
+      />
       {/* No edit/delete links: invoices are immutable by design. */}
       {rows.length === 0 ? <p>No invoices yet.</p> : (
         <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 16 }}>

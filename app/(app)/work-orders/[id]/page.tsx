@@ -6,6 +6,7 @@ import { workOrders, workOrderMaterials, boms } from "@/db/schema/production"
 import { items, lots, lotGenealogy } from "@/db/schema/inventory"
 import { cancelWorkOrder } from "@/app/actions/work-orders"
 import { ReleaseButton, CompleteButton } from "../wo-buttons"
+import { PageHeader } from "@/components/ui/page-header"
 
 export const dynamic = "force-dynamic"
 
@@ -35,7 +36,7 @@ export default async function WorkOrderDetailPage({ params }: { params: Promise<
   return (
     <div className="space-y-6">
       <Link href="/work-orders">← Back to work orders</Link>
-      <h1>Work order — {product?.name}</h1>
+      <PageHeader title={`Work order — ${product?.name}`} />
       <p>Status: <b>{wo.status}</b> · BOM v{bom?.version} · Planned: <b>{wo.quantityPlanned}</b> · Produced: <b>{wo.quantityProduced}</b></p>
 
       <h2>Materials (MRP explosion)</h2>

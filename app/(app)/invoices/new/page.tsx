@@ -3,6 +3,7 @@ import { asc, inArray } from "drizzle-orm"
 import { db } from "@/db"
 import { parties } from "@/db/schema/parties"
 import { NewInvoiceForm } from "../new-invoice-form"
+import { PageHeader } from "@/components/ui/page-header"
 
 export const dynamic = "force-dynamic"
 
@@ -15,7 +16,7 @@ export default async function NewInvoicePage() {
 
   return (
     <div className="space-y-6">
-      <h1>New invoice</h1>
+      <PageHeader title="New invoice" />
       <NewInvoiceForm customers={customers} />
     </div>
   )

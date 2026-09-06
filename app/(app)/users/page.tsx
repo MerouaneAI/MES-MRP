@@ -6,6 +6,7 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import { setUserRole, setUserActive, resetUserPassword } from "@/app/actions/users"
 import { CreateUserForm } from "./users-forms"
+import { PageHeader } from "@/components/ui/page-header"
 
 export const dynamic = "force-dynamic"
 
@@ -17,7 +18,7 @@ export default async function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <h1>Users</h1>
+      <PageHeader title="Users" />
       <CreateUserForm />
       <table cellPadding={8} style={{ borderCollapse: "collapse" }}>
         <thead><tr><th align="left">Email</th><th align="left">Name</th><th align="left">Role</th><th align="left">Active</th><th>Reset password</th></tr></thead>

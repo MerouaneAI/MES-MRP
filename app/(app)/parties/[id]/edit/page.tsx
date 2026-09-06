@@ -4,6 +4,7 @@ import { db } from "@/db"
 import { parties } from "@/db/schema/parties"
 import { updateParty } from "@/app/actions/parties"
 import { PartyForm } from "../../party-form"
+import { PageHeader } from "@/components/ui/page-header"
 
 export default async function EditPartyPage({
   params,
@@ -18,7 +19,7 @@ export default async function EditPartyPage({
 
   return (
     <div className="space-y-6">
-      <h1>Edit party</h1>
+      <PageHeader title="Edit party" />
       <PartyForm
         action={action}
         submitLabel="Save changes"

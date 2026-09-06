@@ -6,6 +6,8 @@ import { items } from "@/db/schema/inventory"
 import { applyEco, cancelEco } from "@/app/actions/eco"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
+import { PageHeader } from "@/components/ui/page-header"
+import { buttonClass } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
 
@@ -27,10 +29,10 @@ export default async function EcoPage() {
 
   return (
     <div className="space-y-6">
-      <header style={{ display: "flex", justifyContent: "space-between" }}>
-        <h1>Engineering change orders</h1>
-        {isAdmin && <Link href="/eco/new">+ New ECO</Link>}
-      </header>
+      <PageHeader
+        title="Engineering change orders"
+        actions={isAdmin ? <Link href="/eco/new" className={buttonClass()}>+ New ECO</Link> : undefined}
+      />
       {rows.length === 0 ? <p>No ECOs yet.</p> : (
         <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 16 }}>
           <thead><tr><th align="left">Product</th><th align="left">Target</th><th align="left">Reason</th><th align="left">Status</th><th /></tr></thead>

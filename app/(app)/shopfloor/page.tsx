@@ -6,6 +6,7 @@ import { DispatchBoardLive } from "./dispatch-board-live"
 import { ScanForm } from "./scan-form"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
+import { PageHeader } from "@/components/ui/page-header"
 
 export const dynamic = "force-dynamic"
 
@@ -45,10 +46,10 @@ export default async function ShopFloorPage() {
 
   return (
     <div className="space-y-6">
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1>Shop-floor dispatch</h1>
-        <DispatchBoardLive />
-      </header>
+      <PageHeader
+        title="Shop-floor dispatch"
+        actions={<DispatchBoardLive />}
+      />
 
       {released.length === 0 ? <p>No released work orders. Release one to see it here.</p> : (
         <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", marginTop: 16 }}>

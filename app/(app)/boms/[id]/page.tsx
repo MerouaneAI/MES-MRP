@@ -6,6 +6,7 @@ import { boms, bomLines } from "@/db/schema/production"
 import { items } from "@/db/schema/inventory"
 import { activateBom, removeBomLine } from "@/app/actions/boms"
 import { BomLineForm } from "../bom-line-form"
+import { PageHeader } from "@/components/ui/page-header"
 
 export const dynamic = "force-dynamic"
 
@@ -36,7 +37,7 @@ export default async function BomDetailPage({ params }: { params: Promise<{ id: 
   return (
     <div className="space-y-6">
       <Link href="/boms">← Back to BOMs</Link>
-      <h1>{product?.name} — v{bom.version}</h1>
+      <PageHeader title={`${product?.name} — v${bom.version}`} />
       <p>Status: <b>{bom.status}</b>{bom.notes ? ` · ${bom.notes}` : ""}</p>
 
       <h2>Components</h2>

@@ -3,6 +3,7 @@ import { db } from "@/db"
 import { boms, workCenters } from "@/db/schema/production"
 import { items } from "@/db/schema/inventory"
 import { NewWorkOrderForm } from "./new-wo-form"
+import { PageHeader } from "@/components/ui/page-header"
 
 export const dynamic = "force-dynamic"
 
@@ -21,7 +22,7 @@ export default async function NewWorkOrderPage() {
 
   return (
     <div className="space-y-6">
-      <h1>New work order</h1>
+      <PageHeader title="New work order" />
       <NewWorkOrderForm products={products} workCenters={centers} />
     </div>
   )

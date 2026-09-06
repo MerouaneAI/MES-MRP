@@ -3,6 +3,7 @@ import { db } from "@/db"
 import { boms } from "@/db/schema/production"
 import { items } from "@/db/schema/inventory"
 import { NewEcoForm } from "./new-eco-form"
+import { PageHeader } from "@/components/ui/page-header"
 
 export const dynamic = "force-dynamic"
 
@@ -22,7 +23,7 @@ export default async function NewEcoPage() {
 
   return (
     <div className="space-y-6"> 
-      <h1>New ECO</h1>
+      <PageHeader title="New ECO" />
       <NewEcoForm products={active} drafts={drafts} />
     </div>
   )

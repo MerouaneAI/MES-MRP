@@ -6,6 +6,8 @@ import { purchaseOrders } from "@/db/schema/purchases"
 import { parties } from "@/db/schema/parties"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
+import { PageHeader } from "@/components/ui/page-header"
+import { buttonClass } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
 
@@ -25,10 +27,10 @@ export default async function PurchasingPage() {
 
   return (
     <div className="space-y-6">
-      <header style={{ display: "flex", justifyContent: "space-between" }}>
-        <h1>Purchasing</h1>
-        {canWrite && <Link href="/purchasing/new">+ New purchase order</Link>}
-      </header>
+      <PageHeader
+        title="Purchasing"
+        actions={canWrite ? <Link href="/purchasing/new" className={buttonClass()}>+ New purchase order</Link> : undefined}
+      />
       {rows.length === 0 ? <p>No purchase orders yet.</p> : (
         <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 16 }}>
           <thead><tr><th align="left">Supplier</th><th align="left">Status</th><th align="right">Total (DZD)</th><th /></tr></thead>

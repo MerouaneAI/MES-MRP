@@ -5,6 +5,7 @@ import { db } from "@/db"
 import { lots, items } from "@/db/schema/inventory"
 import { updateLot } from "@/app/actions/lots"
 import { LotForm } from "../../lot-form"
+import { PageHeader } from "@/components/ui/page-header"
 
 export const dynamic = "force-dynamic"
 
@@ -18,7 +19,7 @@ export default async function EditLotPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="space-y-6">
-      <h1>Edit lot</h1>
+      <PageHeader title="Edit lot" />
       <LotForm
         action={action}
         submitLabel="Save changes"

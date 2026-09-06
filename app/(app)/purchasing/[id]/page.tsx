@@ -7,6 +7,7 @@ import { parties } from "@/db/schema/parties"
 import { items } from "@/db/schema/inventory"
 import { markOrdered, receivePurchaseOrder, removePurchaseOrderLine } from "@/app/actions/purchasing"
 import { AddLineForm } from "../add-line-form"
+import { PageHeader } from "@/components/ui/page-header"
 
 export const dynamic = "force-dynamic"
 
@@ -24,7 +25,7 @@ export default async function PurchaseOrderPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-6">
       <Link href="/purchasing">← Back to purchasing</Link>
-      <h1>Purchase order</h1>
+      <PageHeader title="Purchase order" />
       <p>Supplier: <b>{supplier?.name ?? "—"}</b> · Status: <b>{po.status}</b> · Total: <b>{po.totalAmount} DZD</b></p>
 
       <h2>Lines</h2>

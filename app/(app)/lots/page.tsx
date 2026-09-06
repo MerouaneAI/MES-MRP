@@ -5,6 +5,8 @@ import { lots, items } from "@/db/schema/inventory"
 import { deleteLot } from "@/app/actions/lots"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
+import { PageHeader } from "@/components/ui/page-header"
+import { buttonClass } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
 
@@ -39,10 +41,10 @@ export default async function LotsPage() {
 
   return (
     <div className="space-y-6">
-      <header style={{ display: "flex", justifyContent: "space-between" }}>
-        <h1>Inventory (lots)</h1>
-        {canWrite && <Link href="/lots/new">+ Add lot</Link>}
-      </header>
+      <PageHeader
+        title="Inventory (lots)"
+        actions={canWrite ? <Link href="/lots/new" className={buttonClass()}>+ Add lot</Link> : undefined}
+      />
       {rows.length === 0 ? <p>No lots yet.</p> : (
         <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 16 }}>
           <thead><tr><th align="left">Item</th><th align="left">Lot #</th><th align="right">On hand</th><th align="left">Expiry (FEFO)</th><th /></tr></thead>

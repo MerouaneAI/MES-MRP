@@ -4,6 +4,7 @@ import { db } from "@/db"
 import { auditLog } from "@/db/schema/audit"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
+import { PageHeader } from "@/components/ui/page-header"
 
 export const dynamic = "force-dynamic"
 
@@ -15,8 +16,7 @@ export default async function AuditPage() {
 
   return (
     <div className="space-y-6">
-      <h1>Audit log</h1>
-      <p style={{ color: "#666" }}>Most recent 200 events.</p>
+      <PageHeader title="Audit log" description="Most recent 200 events." />
       <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 12 }}>
         <thead><tr><th align="left">When</th><th align="left">User</th><th align="left">Action</th><th align="left">Summary</th></tr></thead>
         <tbody>

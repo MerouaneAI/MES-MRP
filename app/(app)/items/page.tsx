@@ -6,6 +6,8 @@ import { items } from "@/db/schema/inventory"
 import { deleteItem } from "@/app/actions/items"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
+import { PageHeader } from "@/components/ui/page-header"
+import { buttonClass } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
 
@@ -16,10 +18,10 @@ export default async function ItemsPage() {
   const rows = await db.select().from(items).orderBy(desc(items.createdAt))
   return (
     <div className="space-y-6">
-      <header style={{ display: "flex", justifyContent: "space-between" }}>
-        <h1>Items</h1>
-        {canWrite && <Link href="/items/new">+ Add item</Link>}
-      </header>
+      <PageHeader
+        title="Items"
+        actions={canWrite ? <Link href="/items/new" className={buttonClass()}>+ Add item</Link> : undefined}
+      />
       {rows.length === 0 ? <p>No items yet.</p> : (
         <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 16 }}>
           <thead><tr><th align="left">SKU</th><th align="left">Name</th><th align="left">Kind</th><th align="left">Unit</th><th /></tr></thead>

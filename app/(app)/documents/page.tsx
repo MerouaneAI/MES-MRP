@@ -6,6 +6,7 @@ import { lots } from "@/db/schema/inventory"
 import { enqueuePoPdf, enqueueCoaPdf } from "@/app/actions/documents"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
+import { PageHeader } from "@/components/ui/page-header"
 
 export const dynamic = "force-dynamic"
 
@@ -18,7 +19,7 @@ export default async function DocumentsPage() {
 
   return (
     <div className="space-y-6">
-      <h1>Documents</h1>
+      <PageHeader title="Documents" />
 
       {canWrite && (
         <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginBottom: 24 }}>

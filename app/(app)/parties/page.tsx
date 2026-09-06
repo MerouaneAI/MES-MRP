@@ -5,6 +5,8 @@ import { parties } from "@/db/schema/parties"
 import { deleteParty } from "@/app/actions/parties"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
+import { PageHeader } from "@/components/ui/page-header"
+import { buttonClass } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
 
@@ -16,10 +18,10 @@ export default async function PartiesPage() {
 
   return (
     <div className="space-y-6">
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1>Parties</h1>
-        {canWrite && <Link href="/parties/new">+ Add party</Link>}
-      </header>
+      <PageHeader
+        title="Parties"
+        actions={canWrite ? <Link href="/parties/new" className={buttonClass()}>+ Add party</Link> : undefined}
+      />
 
       {rows.length === 0 ? (
         <p>No parties yet. Add your first one.</p>

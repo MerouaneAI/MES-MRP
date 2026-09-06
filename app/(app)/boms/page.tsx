@@ -5,6 +5,8 @@ import { boms } from "@/db/schema/production"
 import { items } from "@/db/schema/inventory"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
+import { PageHeader } from "@/components/ui/page-header"
+import { buttonClass } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
 
@@ -19,10 +21,10 @@ export default async function BomsPage() {
 
   return (
     <div className="space-y-6">
-      <header style={{ display: "flex", justifyContent: "space-between" }}>
-        <h1>Bills of materials</h1>
-        {canWrite && <Link href="/boms/new">+ New BOM</Link>}
-      </header>
+      <PageHeader
+        title="Bills of materials"
+        actions={canWrite ? <Link href="/boms/new" className={buttonClass()}>+ New BOM</Link> : undefined}
+      />
       {rows.length === 0 ? <p>No BOMs yet.</p> : (
         <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 16 }}>
           <thead><tr><th align="left">Product</th><th align="right">Version</th><th align="left">Status</th><th /></tr></thead>
