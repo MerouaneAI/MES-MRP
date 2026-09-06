@@ -1,0 +1,10 @@
+// components/ui/index.ts  (barrel — import from "@/components/ui")
+export * from "./button"
+export * from "./badge"
+export * from "./card"
+export * from "./stat-card"
+export * from "./field"
+export * from "./table"
+export * from "./page-header"
+export * from "./section-label"
+export * from "./empty-state"
