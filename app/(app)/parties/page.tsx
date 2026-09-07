@@ -7,6 +7,8 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import { PageHeader } from "@/components/ui/page-header"
 import { buttonClass } from "@/components/ui/button"
+import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
 
 export const dynamic = "force-dynamic"
 
@@ -26,21 +28,19 @@ export default async function PartiesPage() {
       {rows.length === 0 ? (
         <p>No parties yet. Add your first one.</p>
       ) : (
-        <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 16 }}>
-          <thead>
-            <tr>
-              <th align="left">Name</th><th align="left">Type</th>
-              <th align="left">Phone</th><th align="left">NIF</th><th />
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <THead>
+            <TH>Name</TH><TH>Type</TH>
+            <TH>Phone</TH><TH>NIF</TH><TH />
+          </THead>
+          <TBody>
             {rows.map((p) => (
-              <tr key={p.id} style={{ borderTop: "1px solid #ddd" }}>
-                <td>{p.name}</td>
-                <td>{p.type}</td>
-                <td>{p.phone ?? "—"}</td>
-                <td>{p.nif ?? "—"}</td>
-                <td style={{ display: "flex", gap: 8 }}>
+              <TR key={p.id}>
+                <TD>{p.name}</TD>
+                <TD><Badge>{p.type}</Badge></TD>
+                <TD>{p.phone ?? "—"}</TD>
+                <TD>{p.nif ?? "—"}</TD>
+                <TD className="flex items-center gap-2">
                   {canWrite && <Link href={`/parties/${p.id}/edit`}>Edit</Link>}
                   {canDelete && (
                     <form action={deleteParty}>
@@ -48,11 +48,11 @@ export default async function PartiesPage() {
                       <button type="submit">Delete</button>
                     </form>
                   )}
-                </td>
-              </tr>
+                </TD>
+              </TR>
             ))}
-          </tbody>
-        </table>
+          </TBody>
+        </Table>
       )}
     </div>
   )

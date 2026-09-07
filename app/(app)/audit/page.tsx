@@ -5,6 +5,7 @@ import { auditLog } from "@/db/schema/audit"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import { PageHeader } from "@/components/ui/page-header"
+import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 
 export const dynamic = "force-dynamic"
 
@@ -17,19 +18,19 @@ export default async function AuditPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Audit log" description="Most recent 200 events." />
-      <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 12 }}>
-        <thead><tr><th align="left">When</th><th align="left">User</th><th align="left">Action</th><th align="left">Summary</th></tr></thead>
-        <tbody>
+      <Table>
+        <THead><TH>When</TH><TH>User</TH><TH>Action</TH><TH>Summary</TH></THead>
+        <TBody>
           {rows.map((r) => (
-            <tr key={r.id} style={{ borderTop: "1px solid #ddd" }}>
-              <td>{new Date(r.createdAt).toISOString().replace("T", " ").slice(0, 19)}</td>
-              <td>{r.userEmail ?? "system"}</td>
-              <td>{r.action}</td>
-              <td>{r.summary ?? "—"}</td>
-            </tr>
+            <TR key={r.id}>
+              <TD>{new Date(r.createdAt).toISOString().replace("T", " ").slice(0, 19)}</TD>
+              <TD>{r.userEmail ?? "system"}</TD>
+              <TD>{r.action}</TD>
+              <TD>{r.summary ?? "—"}</TD>
+            </TR>
           ))}
-        </tbody>
-      </table>
+        </TBody>
+      </Table>
     </div>
   )
 }

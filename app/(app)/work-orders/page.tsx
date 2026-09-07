@@ -7,6 +7,8 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import { PageHeader } from "@/components/ui/page-header"
 import { buttonClass } from "@/components/ui/button"
+import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
+import { StatusBadge } from "@/components/ui/badge"
 
 export const dynamic = "force-dynamic"
 
@@ -30,20 +32,20 @@ export default async function WorkOrdersPage() {
         actions={canWrite ? <Link href="/work-orders/new" className={buttonClass()}>+ New work order</Link> : undefined}
       />
       {rows.length === 0 ? <p>No work orders yet.</p> : (
-        <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 16 }}>
-          <thead><tr><th align="left">Product</th><th align="left">Status</th><th align="right">Planned</th><th align="right">Produced</th><th /></tr></thead>
-          <tbody>
+        <Table>
+          <THead><TH>Product</TH><TH>Status</TH><TH className="text-right">Planned</TH><TH className="text-right">Produced</TH><TH /></THead>
+          <TBody>
             {rows.map((w) => (
-              <tr key={w.id} style={{ borderTop: "1px solid #ddd" }}>
-                <td>{w.productName} <span style={{ color: "#999" }}>({w.productSku})</span></td>
-                <td>{w.status}</td>
-                <td align="right">{w.quantityPlanned}</td>
-                <td align="right">{w.quantityProduced}</td>
-                <td><Link href={`/work-orders/${w.id}`}>Open</Link></td>
-              </tr>
+              <TR key={w.id}>
+                <TD>{w.productName} <span className="text-ink-muted">({w.productSku})</span></TD>
+                <TD><StatusBadge status={w.status} /></TD>
+                <TD align="right">{w.quantityPlanned}</TD>
+                <TD align="right">{w.quantityProduced}</TD>
+                <TD><Link href={`/work-orders/${w.id}`}>Open</Link></TD>
+              </TR>
             ))}
-          </tbody>
-        </table>
+          </TBody>
+        </Table>
       )}
     </div>
   )

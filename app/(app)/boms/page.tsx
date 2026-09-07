@@ -7,6 +7,8 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import { PageHeader } from "@/components/ui/page-header"
 import { buttonClass } from "@/components/ui/button"
+import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
+import { StatusBadge } from "@/components/ui/badge"
 
 export const dynamic = "force-dynamic"
 
@@ -26,19 +28,19 @@ export default async function BomsPage() {
         actions={canWrite ? <Link href="/boms/new" className={buttonClass()}>+ New BOM</Link> : undefined}
       />
       {rows.length === 0 ? <p>No BOMs yet.</p> : (
-        <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 16 }}>
-          <thead><tr><th align="left">Product</th><th align="right">Version</th><th align="left">Status</th><th /></tr></thead>
-          <tbody>
+        <Table>
+          <THead><TH>Product</TH><TH className="text-right">Version</TH><TH>Status</TH><TH /></THead>
+          <TBody>
             {rows.map((b) => (
-              <tr key={b.id} style={{ borderTop: "1px solid #ddd" }}>
-                <td>{b.productName} <span style={{ color: "#999" }}>({b.productSku})</span></td>
-                <td align="right">v{b.version}</td>
-                <td>{b.status}</td>
-                <td><Link href={`/boms/${b.id}`}>Open</Link></td>
-              </tr>
+              <TR key={b.id}>
+                <TD>{b.productName} <span className="text-ink-muted">({b.productSku})</span></TD>
+                <TD align="right">v{b.version}</TD>
+                <TD><StatusBadge status={b.status} /></TD>
+                <TD><Link href={`/boms/${b.id}`}>Open</Link></TD>
+              </TR>
             ))}
-          </tbody>
-        </table>
+          </TBody>
+        </Table>
       )}
     </div>
   )

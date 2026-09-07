@@ -7,6 +7,7 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import { PageHeader } from "@/components/ui/page-header"
 import { buttonClass } from "@/components/ui/button"
+import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 
 export const dynamic = "force-dynamic"
 
@@ -46,18 +47,18 @@ export default async function LotsPage() {
         actions={canWrite ? <Link href="/lots/new" className={buttonClass()}>+ Add lot</Link> : undefined}
       />
       {rows.length === 0 ? <p>No lots yet.</p> : (
-        <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 16 }}>
-          <thead><tr><th align="left">Item</th><th align="left">Lot #</th><th align="right">On hand</th><th align="left">Expiry (FEFO)</th><th /></tr></thead>
-          <tbody>
+        <Table>
+          <THead><TH>Item</TH><TH>Lot #</TH><TH className="text-right">On hand</TH><TH>Expiry (FEFO)</TH><TH /></THead>
+          <TBody>
             {rows.map((l) => {
               const badge = expiryBadge(l.expiresAt)
               return (
-                <tr key={l.id} style={{ borderTop: "1px solid #ddd" }}>
-                  <td>{l.itemName} <span style={{ color: "#999" }}>({l.itemSku})</span></td>
-                  <td>{l.lotNumber}</td>
-                  <td align="right">{l.quantityOnHand} {l.unit}</td>
-                  <td style={{ color: badge.color }}>{badge.label}</td>
-                  <td style={{ display: "flex", gap: 8 }}>
+                <TR key={l.id}>
+                  <TD>{l.itemName} <span className="text-ink-muted">({l.itemSku})</span></TD>
+                  <TD>{l.lotNumber}</TD>
+                  <TD align="right">{l.quantityOnHand} {l.unit}</TD>
+                  <TD><span style={{ color: badge.color }}>{badge.label}</span></TD>
+                  <TD className="flex items-center gap-2">
                     {canWrite && <Link href={`/lots/${l.id}/edit`}>Edit</Link>}
                     {canDelete && (
                       <form action={deleteLot}>
@@ -65,12 +66,12 @@ export default async function LotsPage() {
                         <button type="submit">Delete</button>
                       </form>
                     )}
-                  </td>
-                </tr>
+                  </TD>
+                </TR>
               )
             })}
-          </tbody>
-        </table>
+          </TBody>
+        </Table>
       )}
     </div>
   )

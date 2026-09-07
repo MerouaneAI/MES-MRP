@@ -8,6 +8,8 @@ import { items } from "@/db/schema/inventory"
 import { markOrdered, receivePurchaseOrder, removePurchaseOrderLine } from "@/app/actions/purchasing"
 import { AddLineForm } from "../add-line-form"
 import { PageHeader } from "@/components/ui/page-header"
+import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
+import { StatusBadge } from "@/components/ui/badge"
 
 export const dynamic = "force-dynamic"
 
@@ -26,32 +28,32 @@ export default async function PurchaseOrderPage({ params }: { params: Promise<{ 
     <div className="space-y-6">
       <Link href="/purchasing">← Back to purchasing</Link>
       <PageHeader title="Purchase order" />
-      <p>Supplier: <b>{supplier?.name ?? "—"}</b> · Status: <b>{po.status}</b> · Total: <b>{po.totalAmount} DZD</b></p>
+      <p>Supplier: <b>{supplier?.name ?? "—"}</b> · Status: <StatusBadge status={po.status} /> · Total: <b>{po.totalAmount} DZD</b></p>
 
       <h2>Lines</h2>
       {lines.length === 0 ? <p>No lines yet.</p> : (
-        <table cellPadding={8} style={{ borderCollapse: "collapse" }}>
-          <thead><tr><th align="left">Item</th><th align="right">Qty</th><th align="right">Unit price</th><th align="right">Line total</th>{editable && <th />}</tr></thead>
-          <tbody>
+        <Table>
+          <THead><TH>Item</TH><TH className="text-right">Qty</TH><TH className="text-right">Unit price</TH><TH className="text-right">Line total</TH>{editable && <TH />}</THead>
+          <TBody>
             {lines.map((l) => (
-              <tr key={l.id} style={{ borderTop: "1px solid #ddd" }}>
-                <td>{l.description ?? l.itemId}</td>
-                <td align="right">{l.quantity}</td>
-                <td align="right">{l.unitPrice}</td>
-                <td align="right">{l.lineTotal}</td>
+              <TR key={l.id}>
+                <TD>{l.description ?? l.itemId}</TD>
+                <TD align="right">{l.quantity}</TD>
+                <TD align="right">{l.unitPrice}</TD>
+                <TD align="right">{l.lineTotal}</TD>
                 {editable && (
-                  <td>
+                  <TD>
                     <form action={removePurchaseOrderLine}>
                       <input type="hidden" name="lineId" value={l.id} />
                       <input type="hidden" name="poId" value={po.id} />
                       <button type="submit">Remove</button>
                     </form>
-                  </td>
+                  </TD>
                 )}
-              </tr>
+              </TR>
             ))}
-          </tbody>
-        </table>
+          </TBody>
+        </Table>
       )}
 
       {editable && <AddLineForm poId={po.id} items={itemOptions} />}

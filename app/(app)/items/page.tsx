@@ -8,6 +8,8 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import { PageHeader } from "@/components/ui/page-header"
 import { buttonClass } from "@/components/ui/button"
+import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
 
 export const dynamic = "force-dynamic"
 
@@ -23,16 +25,16 @@ export default async function ItemsPage() {
         actions={canWrite ? <Link href="/items/new" className={buttonClass()}>+ Add item</Link> : undefined}
       />
       {rows.length === 0 ? <p>No items yet.</p> : (
-        <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 16 }}>
-          <thead><tr><th align="left">SKU</th><th align="left">Name</th><th align="left">Kind</th><th align="left">Unit</th><th /></tr></thead>
-          <tbody>
+        <Table>
+          <THead><TH>SKU</TH><TH>Name</TH><TH>Kind</TH><TH>Unit</TH><TH /></THead>
+          <TBody>
             {rows.map((it) => (
-              <tr key={it.id} style={{ borderTop: "1px solid #ddd" }}>
-                <td>{it.sku}</td>
-                <td>{it.name}</td>
-                <td>{it.kind}</td>
-                <td>{it.unit}</td>
-                <td style={{ display: "flex", gap: 8 }}>
+              <TR key={it.id}>
+                <TD>{it.sku}</TD>
+                <TD>{it.name}</TD>
+                <TD><Badge>{it.kind}</Badge></TD>
+                <TD>{it.unit}</TD>
+                <TD className="flex items-center gap-2">
                   {canWrite && <Link href={`/items/${it.id}/edit`}>Edit</Link>}
                   {canDelete && (
                     <form action={deleteItem}>
@@ -40,11 +42,11 @@ export default async function ItemsPage() {
                       <button type="submit">Delete</button>
                     </form>
                   )}
-                </td>
-              </tr>
+                </TD>
+              </TR>
             ))}
-          </tbody>
-        </table>
+          </TBody>
+        </Table>
       )}
     </div>
   )

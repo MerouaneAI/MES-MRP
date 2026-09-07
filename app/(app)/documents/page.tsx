@@ -7,6 +7,8 @@ import { enqueuePoPdf, enqueueCoaPdf } from "@/app/actions/documents"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import { PageHeader } from "@/components/ui/page-header"
+import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
+import { Badge, StatusBadge } from "@/components/ui/badge"
 
 export const dynamic = "force-dynamic"
 
@@ -46,19 +48,19 @@ export default async function DocumentsPage() {
       )}
 
       {docs.length === 0 ? <p>No documents yet. Generate one above.</p> : (
-        <table cellPadding={8} style={{ borderCollapse: "collapse" }}>
-          <thead><tr><th align="left">Kind</th><th align="left">Ref</th><th align="left">Status</th><th /></tr></thead>
-          <tbody>
+        <Table>
+          <THead><TH>Kind</TH><TH>Ref</TH><TH>Status</TH><TH /></THead>
+          <TBody>
             {docs.map((d) => (
-              <tr key={d.id} style={{ borderTop: "1px solid #ddd" }}>
-                <td>{d.kind}</td>
-                <td>{d.refId.slice(0, 8)}</td>
-                <td>{d.status}{d.error ? ` — ${d.error}` : ""}</td>
-                <td>{d.status === "done" ? <a href={`/api/documents/${d.id}`}>Download</a> : "—"}</td>
-              </tr>
+              <TR key={d.id}>
+                <TD><Badge>{d.kind}</Badge></TD>
+                <TD>{d.refId.slice(0, 8)}</TD>
+                <TD><StatusBadge status={d.status} />{d.error ? ` — ${d.error}` : ""}</TD>
+                <TD>{d.status === "done" ? <a href={`/api/documents/${d.id}`}>Download</a> : "—"}</TD>
+              </TR>
             ))}
-          </tbody>
-        </table>
+          </TBody>
+        </Table>
       )}
 
       <p style={{ color: "#666", marginTop: 16, fontSize: 13 }}>

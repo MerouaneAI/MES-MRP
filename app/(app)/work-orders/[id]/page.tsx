@@ -7,6 +7,8 @@ import { items, lots, lotGenealogy } from "@/db/schema/inventory"
 import { cancelWorkOrder } from "@/app/actions/work-orders"
 import { ReleaseButton, CompleteButton } from "../wo-buttons"
 import { PageHeader } from "@/components/ui/page-header"
+import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
+import { StatusBadge } from "@/components/ui/badge"
 
 export const dynamic = "force-dynamic"
 
@@ -37,38 +39,38 @@ export default async function WorkOrderDetailPage({ params }: { params: Promise<
     <div className="space-y-6">
       <Link href="/work-orders">← Back to work orders</Link>
       <PageHeader title={`Work order — ${product?.name}`} />
-      <p>Status: <b>{wo.status}</b> · BOM v{bom?.version} · Planned: <b>{wo.quantityPlanned}</b> · Produced: <b>{wo.quantityProduced}</b></p>
+      <p>Status: <StatusBadge status={wo.status} /> · BOM v{bom?.version} · Planned: <b>{wo.quantityPlanned}</b> · Produced: <b>{wo.quantityProduced}</b></p>
 
       <h2>Materials (MRP explosion)</h2>
       {materials.length === 0 ? <p>Not yet released — release to run the MRP explosion.</p> : (
-        <table cellPadding={8} style={{ borderCollapse: "collapse" }}>
-          <thead><tr><th align="left">Component</th><th align="right">Required</th></tr></thead>
-          <tbody>
+        <Table>
+          <THead><TH>Component</TH><TH className="text-right">Required</TH></THead>
+          <TBody>
             {materials.map((m) => (
-              <tr key={m.id} style={{ borderTop: "1px solid #ddd" }}>
-                <td>{m.name} <span style={{ color: "#999" }}>({m.sku})</span></td>
-                <td align="right">{m.quantityRequired} {m.unit}</td>
-              </tr>
+              <TR key={m.id}>
+                <TD>{m.name} <span className="text-ink-muted">({m.sku})</span></TD>
+                <TD align="right">{m.quantityRequired} {m.unit}</TD>
+              </TR>
             ))}
-          </tbody>
-        </table>
+          </TBody>
+        </Table>
       )}
 
       {genealogy.length > 0 && (
         <>
           <h2>Traceability (consumed lots → output)</h2>
-          <table cellPadding={8} style={{ borderCollapse: "collapse" }}>
-            <thead><tr><th align="left">Input lot</th><th align="left">Material</th><th align="right">Qty used</th></tr></thead>
-            <tbody>
+          <Table>
+            <THead><TH>Input lot</TH><TH>Material</TH><TH className="text-right">Qty used</TH></THead>
+            <TBody>
               {genealogy.map((g) => (
-                <tr key={g.id} style={{ borderTop: "1px solid #ddd" }}>
-                  <td>{g.lotNumber}</td>
-                  <td>{g.itemName}</td>
-                  <td align="right">{g.quantityUsed}</td>
-                </tr>
+                <TR key={g.id}>
+                  <TD>{g.lotNumber}</TD>
+                  <TD>{g.itemName}</TD>
+                  <TD align="right">{g.quantityUsed}</TD>
+                </TR>
               ))}
-            </tbody>
-          </table>
+            </TBody>
+          </Table>
         </>
       )}
 

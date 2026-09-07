@@ -8,6 +8,8 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import { PageHeader } from "@/components/ui/page-header"
 import { buttonClass } from "@/components/ui/button"
+import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
+import { StatusBadge } from "@/components/ui/badge"
 
 export const dynamic = "force-dynamic"
 
@@ -34,16 +36,16 @@ export default async function EcoPage() {
         actions={isAdmin ? <Link href="/eco/new" className={buttonClass()}>+ New ECO</Link> : undefined}
       />
       {rows.length === 0 ? <p>No ECOs yet.</p> : (
-        <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 16 }}>
-          <thead><tr><th align="left">Product</th><th align="left">Target</th><th align="left">Reason</th><th align="left">Status</th><th /></tr></thead>
-          <tbody>
+        <Table>
+          <THead><TH>Product</TH><TH>Target</TH><TH>Reason</TH><TH>Status</TH><TH /></THead>
+          <TBody>
             {rows.map((e) => (
-              <tr key={e.id} style={{ borderTop: "1px solid #ddd" }}>
-                <td>{e.productName}</td>
-                <td>v{e.toVersion}</td>
-                <td>{e.reason}</td>
-                <td>{e.status}</td>
-                <td style={{ display: "flex", gap: 8 }}>
+              <TR key={e.id}>
+                <TD>{e.productName}</TD>
+                <TD>v{e.toVersion}</TD>
+                <TD>{e.reason}</TD>
+                <TD><StatusBadge status={e.status} /></TD>
+                <TD className="flex items-center gap-2">
                   {e.status === "draft" && isAdmin && (
                     <>
                       <form action={applyEco}>
@@ -56,11 +58,11 @@ export default async function EcoPage() {
                       </form>
                     </>
                   )}
-                </td>
-              </tr>
+                </TD>
+              </TR>
             ))}
-          </tbody>
-        </table>
+          </TBody>
+        </Table>
       )}
     </div>
   )

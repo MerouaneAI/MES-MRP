@@ -7,6 +7,7 @@ import { can } from "@/lib/authz"
 import { setUserRole, setUserActive, resetUserPassword } from "@/app/actions/users"
 import { CreateUserForm } from "./users-forms"
 import { PageHeader } from "@/components/ui/page-header"
+import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 
 export const dynamic = "force-dynamic"
 
@@ -20,14 +21,14 @@ export default async function UsersPage() {
     <div className="space-y-6">
       <PageHeader title="Users" />
       <CreateUserForm />
-      <table cellPadding={8} style={{ borderCollapse: "collapse" }}>
-        <thead><tr><th align="left">Email</th><th align="left">Name</th><th align="left">Role</th><th align="left">Active</th><th>Reset password</th></tr></thead>
-        <tbody>
+      <Table>
+        <THead><TH>Email</TH><TH>Name</TH><TH>Role</TH><TH>Active</TH><TH>Reset password</TH></THead>
+        <TBody>
           {rows.map((u) => (
-            <tr key={u.id} style={{ borderTop: "1px solid #ddd" }}>
-              <td>{u.email}{u.id === me.id ? " (you)" : ""}</td>
-              <td>{u.name}</td>
-              <td>
+            <TR key={u.id}>
+              <TD>{u.email}{u.id === me.id ? " (you)" : ""}</TD>
+              <TD>{u.name}</TD>
+              <TD>
                 <form action={setUserRole} style={{ display: "flex", gap: 4 }}>
                   <input type="hidden" name="userId" value={u.id} />
                   <select name="role" defaultValue={u.role}>
@@ -37,25 +38,25 @@ export default async function UsersPage() {
                   </select>
                   <button type="submit">Set</button>
                 </form>
-              </td>
-              <td>
+              </TD>
+              <TD>
                 <form action={setUserActive}>
                   <input type="hidden" name="userId" value={u.id} />
                   <input type="hidden" name="active" value={(!u.isActive).toString()} />
                   <button type="submit">{u.isActive ? "Deactivate" : "Reactivate"}</button>
                 </form>
-              </td>
-              <td>
+              </TD>
+              <TD>
                 <form action={resetUserPassword} style={{ display: "flex", gap: 4 }}>
                   <input type="hidden" name="userId" value={u.id} />
                   <input name="password" type="password" placeholder="New password" />
                   <button type="submit">Reset</button>
                 </form>
-              </td>
-            </tr>
+              </TD>
+            </TR>
           ))}
-        </tbody>
-      </table>
+        </TBody>
+      </Table>
     </div>
   )
 }

@@ -8,6 +8,8 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import { PageHeader } from "@/components/ui/page-header"
 import { buttonClass } from "@/components/ui/button"
+import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
+import { StatusBadge } from "@/components/ui/badge"
 
 export const dynamic = "force-dynamic"
 
@@ -32,19 +34,19 @@ export default async function PurchasingPage() {
         actions={canWrite ? <Link href="/purchasing/new" className={buttonClass()}>+ New purchase order</Link> : undefined}
       />
       {rows.length === 0 ? <p>No purchase orders yet.</p> : (
-        <table cellPadding={8} style={{ borderCollapse: "collapse", marginTop: 16 }}>
-          <thead><tr><th align="left">Supplier</th><th align="left">Status</th><th align="right">Total (DZD)</th><th /></tr></thead>
-          <tbody>
+        <Table>
+          <THead><TH>Supplier</TH><TH>Status</TH><TH className="text-right">Total (DZD)</TH><TH /></THead>
+          <TBody>
             {rows.map((r) => (
-              <tr key={r.id} style={{ borderTop: "1px solid #ddd" }}>
-                <td>{r.supplierName}</td>
-                <td>{r.status}</td>
-                <td align="right">{r.totalAmount}</td>
-                <td><Link href={`/purchasing/${r.id}`}>Open</Link></td>
-              </tr>
+              <TR key={r.id}>
+                <TD>{r.supplierName}</TD>
+                <TD><StatusBadge status={r.status} /></TD>
+                <TD align="right">{r.totalAmount}</TD>
+                <TD><Link href={`/purchasing/${r.id}`}>Open</Link></TD>
+              </TR>
             ))}
-          </tbody>
-        </table>
+          </TBody>
+        </Table>
       )}
     </div>
   )
