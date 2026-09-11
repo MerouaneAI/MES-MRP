@@ -9,7 +9,7 @@ import { ReleaseButton, CompleteButton } from "../wo-buttons"
 import { PageHeader } from "@/components/ui/page-header"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 import { StatusBadge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonClass } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Layers } from "lucide-react"
 
@@ -40,7 +40,7 @@ export default async function WorkOrderDetailPage({ params }: { params: Promise<
 
   return (
     <div className="space-y-6">
-      <Link href="/work-orders">← Back to work orders</Link>
+      <Link href="/work-orders" className={buttonClass({ variant: "ghost", size: "sm" })}>← Back to work orders</Link>
       <PageHeader title={`Work order — ${product?.name}`} />
       <p>Status: <StatusBadge status={wo.status} /> · BOM v{bom?.version} · Planned: <b>{wo.quantityPlanned}</b> · Produced: <b>{wo.quantityProduced}</b></p>
 

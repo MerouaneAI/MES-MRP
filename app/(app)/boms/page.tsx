@@ -38,7 +38,7 @@ export default async function BomsPage() {
                 <TD>{b.productName} <span className="text-ink-muted">({b.productSku})</span></TD>
                 <TD align="right">v{b.version}</TD>
                 <TD><StatusBadge status={b.status} /></TD>
-                <TD><Link href={`/boms/${b.id}`}>Open</Link></TD>
+                <TD><Link href={`/boms/${b.id}`} className={buttonClass({ variant: "ghost", size: "sm" })}>Open</Link></TD>
               </TR>
             ))}
           </TBody>

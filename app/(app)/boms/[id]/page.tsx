@@ -9,7 +9,7 @@ import { BomLineForm } from "../bom-line-form"
 import { PageHeader } from "@/components/ui/page-header"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 import { StatusBadge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonClass } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ListPlus } from "lucide-react"
 
@@ -41,7 +41,7 @@ export default async function BomDetailPage({ params }: { params: Promise<{ id: 
 
   return (
     <div className="space-y-6">
-      <Link href="/boms">← Back to BOMs</Link>
+      <Link href="/boms" className={buttonClass({ variant: "ghost", size: "sm" })}>← Back to BOMs</Link>
       <PageHeader title={`${product?.name} — v${bom.version}`} />
       <p>Status: <StatusBadge status={bom.status} />{bom.notes ? ` · ${bom.notes}` : ""}</p>
 

@@ -14,5 +14,5 @@ export function DispatchBoardLive() {
     return () => es.close()
   }, [router])
 
-  return <p style={{ color: "#0a0", fontSize: 13, margin: 0 }}>● Live — updates automatically</p>
+  return <p className="text-success text-xs m-0">● Live — updates automatically</p>
 }

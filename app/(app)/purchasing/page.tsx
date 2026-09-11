@@ -44,7 +44,7 @@ export default async function PurchasingPage() {
                 <TD>{r.supplierName}</TD>
                 <TD><StatusBadge status={r.status} /></TD>
                 <TD align="right">{r.totalAmount}</TD>
-                <TD><Link href={`/purchasing/${r.id}`}>Open</Link></TD>
+                <TD><Link href={`/purchasing/${r.id}`} className={buttonClass({ variant: "ghost", size: "sm" })}>Open</Link></TD>
               </TR>
             ))}
           </TBody>

@@ -14,12 +14,12 @@ import { Boxes } from "lucide-react"
 export const dynamic = "force-dynamic"
 
 function expiryBadge(expiresAt: string | null) {
-  if (!expiresAt) return { label: "—", color: "#666" }
+  if (!expiresAt) return { label: "—", className: "text-ink-muted" }
   const today = new Date().toISOString().slice(0, 10)
   const in30 = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10)
-  if (expiresAt < today) return { label: `Expired (${expiresAt})`, color: "crimson" }
-  if (expiresAt <= in30) return { label: `Expiring soon (${expiresAt})`, color: "darkorange" }
-  return { label: expiresAt, color: "green" }
+  if (expiresAt < today) return { label: `Expired (${expiresAt})`, className: "text-danger" }
+  if (expiresAt <= in30) return { label: `Expiring soon (${expiresAt})`, className: "text-gold" }
+  return { label: expiresAt, className: "text-success" }
 }
 
 export default async function LotsPage() {
@@ -59,9 +59,9 @@ export default async function LotsPage() {
                   <TD>{l.itemName} <span className="text-ink-muted">({l.itemSku})</span></TD>
                   <TD>{l.lotNumber}</TD>
                   <TD align="right">{l.quantityOnHand} {l.unit}</TD>
-                  <TD><span style={{ color: badge.color }}>{badge.label}</span></TD>
+                  <TD><span className={badge.className}>{badge.label}</span></TD>
                   <TD className="flex items-center gap-2">
-                    {canWrite && <Link href={`/lots/${l.id}/edit`}>Edit</Link>}
+                    {canWrite && <Link href={`/lots/${l.id}/edit`} className={buttonClass({ variant: "ghost", size: "sm" })}>Edit</Link>}
                     {canDelete && (
                       <form action={deleteLot}>
                         <input type="hidden" name="id" value={l.id} />

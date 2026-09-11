@@ -43,7 +43,7 @@ export default async function WorkOrdersPage() {
                 <TD><StatusBadge status={w.status} /></TD>
                 <TD align="right">{w.quantityPlanned}</TD>
                 <TD align="right">{w.quantityProduced}</TD>
-                <TD><Link href={`/work-orders/${w.id}`}>Open</Link></TD>
+                <TD><Link href={`/work-orders/${w.id}`} className={buttonClass({ variant: "ghost", size: "sm" })}>Open</Link></TD>
               </TR>
             ))}
           </TBody>

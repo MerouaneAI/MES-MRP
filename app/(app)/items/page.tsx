@@ -37,7 +37,7 @@ export default async function ItemsPage() {
                 <TD><Badge>{it.kind}</Badge></TD>
                 <TD>{it.unit}</TD>
                 <TD className="flex items-center gap-2">
-                  {canWrite && <Link href={`/items/${it.id}/edit`}>Edit</Link>}
+                  {canWrite && <Link href={`/items/${it.id}/edit`} className={buttonClass({ variant: "ghost", size: "sm" })}>Edit</Link>}
                   {canDelete && (
                     <form action={deleteItem}>
                       <input type="hidden" name="id" value={it.id} />

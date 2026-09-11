@@ -43,7 +43,7 @@ export default async function PartiesPage() {
                 <TD>{p.phone ?? "—"}</TD>
                 <TD>{p.nif ?? "—"}</TD>
                 <TD className="flex items-center gap-2">
-                  {canWrite && <Link href={`/parties/${p.id}/edit`}>Edit</Link>}
+                  {canWrite && <Link href={`/parties/${p.id}/edit`} className={buttonClass({ variant: "ghost", size: "sm" })}>Edit</Link>}
                   {canDelete && (
                     <form action={deleteParty}>
                       <input type="hidden" name="id" value={p.id} />

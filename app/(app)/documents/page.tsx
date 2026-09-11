@@ -10,7 +10,7 @@ import { PageHeader } from "@/components/ui/page-header"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 import { Badge, StatusBadge } from "@/components/ui/badge"
 import { Field, Select } from "@/components/ui/field"
-import { Button } from "@/components/ui/button"
+import { Button, buttonClass } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FileDown } from "lucide-react"
 
@@ -60,14 +60,14 @@ export default async function DocumentsPage() {
                 <TD><Badge>{d.kind}</Badge></TD>
                 <TD>{d.refId.slice(0, 8)}</TD>
                 <TD><StatusBadge status={d.status} />{d.error ? ` — ${d.error}` : ""}</TD>
-                <TD>{d.status === "done" ? <a href={`/api/documents/${d.id}`}>Download</a> : "—"}</TD>
+                <TD>{d.status === "done" ? <a href={`/api/documents/${d.id}`} className={buttonClass({ variant: "ghost", size: "sm" })}>Download</a> : "—"}</TD>
               </TR>
             ))}
           </TBody>
         </Table>
       )}
 
-      <p style={{ color: "#666", marginTop: 16, fontSize: 13 }}>
+      <p className="text-ink-faint mt-4 text-xs">
         Jobs are processed by the worker (<code>npm run worker</code>). Refresh after a moment to see the status change to “done”.
       </p>
     </div>

@@ -10,7 +10,7 @@ import { AddLineForm } from "../add-line-form"
 import { PageHeader } from "@/components/ui/page-header"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 import { StatusBadge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonClass } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ListPlus } from "lucide-react"
 
@@ -29,7 +29,7 @@ export default async function PurchaseOrderPage({ params }: { params: Promise<{ 
 
   return (
     <div className="space-y-6">
-      <Link href="/purchasing">← Back to purchasing</Link>
+      <Link href="/purchasing" className={buttonClass({ variant: "ghost", size: "sm" })}>← Back to purchasing</Link>
       <PageHeader title="Purchase order" />
       <p>Supplier: <b>{supplier?.name ?? "—"}</b> · Status: <StatusBadge status={po.status} /> · Total: <b>{po.totalAmount} DZD</b></p>
 

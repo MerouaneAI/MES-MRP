@@ -7,6 +7,8 @@ import { ScanForm } from "./scan-form"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import { PageHeader } from "@/components/ui/page-header"
+import { EmptyState } from "@/components/ui/empty-state"
+import { Factory } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -51,13 +53,13 @@ export default async function ShopFloorPage() {
         actions={<DispatchBoardLive />}
       />
 
-      {released.length === 0 ? <p>No released work orders. Release one to see it here.</p> : (
-        <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", marginTop: 16 }}>
+      {released.length === 0 ? <EmptyState icon={Factory} title="No released work orders" description="Release a work order to see it here." /> : (
+        <div className="grid gap-4 mt-4 grid-cols-[repeat(auto-fill,minmax(280px,1fr))]">
           {released.map((w) => (
-            <section key={w.id} style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16 }}>
-              <h3 style={{ margin: 0 }}>{w.productName}</h3>
-              <p style={{ color: "#666", margin: "4px 0" }}>{w.productSku} · make {w.quantityPlanned}{w.scheduledFor ? ` · ${w.scheduledFor}` : ""}</p>
-              <ul style={{ margin: "8px 0 0", paddingLeft: 18 }}>
+            <section key={w.id} className="card p-4">
+              <h3 className="m-0 font-serif text-ink">{w.productName}</h3>
+              <p className="text-ink-muted text-sm mt-1">{w.productSku} · make {w.quantityPlanned}{w.scheduledFor ? ` · ${w.scheduledFor}` : ""}</p>
+              <ul className="mt-2 pl-4 text-sm list-disc text-ink-muted">
                 {(byWo.get(w.id) ?? []).map((m, i) => (
                   <li key={i}>{m.name}: {m.quantityRequired} {m.unit}</li>
                 ))}
