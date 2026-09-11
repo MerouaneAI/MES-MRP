@@ -8,6 +8,8 @@ import { setUserRole, setUserActive, resetUserPassword } from "@/app/actions/use
 import { CreateUserForm } from "./users-forms"
 import { PageHeader } from "@/components/ui/page-header"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
+import { Select, Input } from "@/components/ui/field"
+import { Button } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
 
@@ -29,28 +31,28 @@ export default async function UsersPage() {
               <TD>{u.email}{u.id === me.id ? " (you)" : ""}</TD>
               <TD>{u.name}</TD>
               <TD>
-                <form action={setUserRole} style={{ display: "flex", gap: 4 }}>
+                <form action={setUserRole} className="flex gap-1">
                   <input type="hidden" name="userId" value={u.id} />
-                  <select name="role" defaultValue={u.role}>
+                  <Select name="role" defaultValue={u.role}>
                     <option value="viewer">viewer</option>
                     <option value="operator">operator</option>
                     <option value="admin">admin</option>
-                  </select>
-                  <button type="submit">Set</button>
+                  </Select>
+                  <Button type="submit" variant="secondary" size="sm">Set</Button>
                 </form>
               </TD>
               <TD>
                 <form action={setUserActive}>
                   <input type="hidden" name="userId" value={u.id} />
                   <input type="hidden" name="active" value={(!u.isActive).toString()} />
-                  <button type="submit">{u.isActive ? "Deactivate" : "Reactivate"}</button>
+                  <Button type="submit" variant={u.isActive ? "danger" : "primary"} size="sm">{u.isActive ? "Deactivate" : "Reactivate"}</Button>
                 </form>
               </TD>
               <TD>
-                <form action={resetUserPassword} style={{ display: "flex", gap: 4 }}>
+                <form action={resetUserPassword} className="flex gap-1">
                   <input type="hidden" name="userId" value={u.id} />
-                  <input name="password" type="password" placeholder="New password" />
-                  <button type="submit">Reset</button>
+                  <Input name="password" type="password" placeholder="New password" />
+                  <Button type="submit" variant="secondary" size="sm">Reset</Button>
                 </form>
               </TD>
             </TR>

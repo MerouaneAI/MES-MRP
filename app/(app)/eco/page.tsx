@@ -7,7 +7,7 @@ import { applyEco, cancelEco } from "@/app/actions/eco"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import { PageHeader } from "@/components/ui/page-header"
-import { buttonClass } from "@/components/ui/button"
+import { Button, buttonClass } from "@/components/ui/button"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 import { StatusBadge } from "@/components/ui/badge"
 
@@ -50,11 +50,11 @@ export default async function EcoPage() {
                     <>
                       <form action={applyEco}>
                         <input type="hidden" name="ecoId" value={e.id} />
-                        <button type="submit">Apply</button>
+                        <Button type="submit" size="sm">Apply</Button>
                       </form>
                       <form action={cancelEco}>
                         <input type="hidden" name="ecoId" value={e.id} />
-                        <button type="submit">Cancel</button>
+                        <Button type="submit" variant="danger" size="sm">Cancel</Button>
                       </form>
                     </>
                   )}

@@ -3,19 +3,21 @@
 import { useActionState } from "react"
 import { scanBarcode } from "@/app/actions/shopfloor"
 import type { ScanResult } from "@/lib/types"
+import { Input } from "@/components/ui/field"
+import { Button } from "@/components/ui/button"
 
 export function ScanForm() {
   const [state, formAction, pending] = useActionState<ScanResult | null, FormData>(scanBarcode, null)
   return (
-    <div style={{ marginTop: 24 }}>
+    <div className="mt-6">
       <h2>Barcode scan</h2>
-      <form action={formAction} style={{ display: "flex", gap: 8 }}>
-        <input name="code" placeholder="Scan lot number or SKU" autoFocus required />
-        <button type="submit" disabled={pending}>{pending ? "Looking up…" : "Look up"}</button>
+      <form action={formAction} className="flex items-end gap-2">
+        <Input name="code" placeholder="Scan lot number or SKU" autoFocus required />
+        <Button type="submit" disabled={pending}>{pending ? "Looking up…" : "Look up"}</Button>
       </form>
       {state && (state.ok
-        ? <p style={{ color: "green", marginTop: 8 }}><b>{state.title}</b> — {state.detail}</p>
-        : <p style={{ color: "crimson", marginTop: 8 }}>{state.error}</p>
+        ? <p className="text-success mt-2"><b>{state.title}</b> — {state.detail}</p>
+        : <p className="text-danger mt-2">{state.error}</p>
       )}
     </div>
   )

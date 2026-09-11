@@ -6,7 +6,7 @@ import { deleteLot } from "@/app/actions/lots"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import { PageHeader } from "@/components/ui/page-header"
-import { buttonClass } from "@/components/ui/button"
+import { Button, buttonClass } from "@/components/ui/button"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 
 export const dynamic = "force-dynamic"
@@ -63,7 +63,7 @@ export default async function LotsPage() {
                     {canDelete && (
                       <form action={deleteLot}>
                         <input type="hidden" name="id" value={l.id} />
-                        <button type="submit">Delete</button>
+                        <Button type="submit" variant="danger" size="sm">Delete</Button>
                       </form>
                     )}
                   </TD>

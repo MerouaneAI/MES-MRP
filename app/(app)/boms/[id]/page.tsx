@@ -9,6 +9,7 @@ import { BomLineForm } from "../bom-line-form"
 import { PageHeader } from "@/components/ui/page-header"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 import { StatusBadge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
 
@@ -56,7 +57,7 @@ export default async function BomDetailPage({ params }: { params: Promise<{ id: 
                     <form action={removeBomLine}>
                       <input type="hidden" name="lineId" value={l.id} />
                       <input type="hidden" name="bomId" value={bom.id} />
-                      <button type="submit">Remove</button>
+                      <Button type="submit" variant="danger" size="sm">Remove</Button>
                     </form>
                   </TD>
                 )}
@@ -68,11 +69,11 @@ export default async function BomDetailPage({ params }: { params: Promise<{ id: 
 
       {editable && <BomLineForm bomId={bom.id} components={components} />}
 
-      <div style={{ marginTop: 24 }}>
+      <div className="mt-6">
         {canActivate && (
           <form action={activateBom}>
             <input type="hidden" name="bomId" value={bom.id} />
-            <button type="submit">Activate this version</button>
+            <Button type="submit">Activate this version</Button>
           </form>
         )}
         {editable && active && <p>An active version already exists — publish this one through an <Link href="/eco/new">ECO</Link>.</p>}

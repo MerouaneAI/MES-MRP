@@ -9,6 +9,7 @@ import { ReleaseButton, CompleteButton } from "../wo-buttons"
 import { PageHeader } from "@/components/ui/page-header"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 import { StatusBadge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
 
@@ -74,13 +75,13 @@ export default async function WorkOrderDetailPage({ params }: { params: Promise<
         </>
       )}
 
-      <div style={{ display: "flex", gap: 16, marginTop: 24, alignItems: "start" }}>
+      <div className="flex gap-4 mt-6 items-start">
         {wo.status === "planned" && <ReleaseButton workOrderId={wo.id} />}
         {wo.status === "released" && <CompleteButton workOrderId={wo.id} />}
         {(wo.status === "planned" || wo.status === "released") && (
           <form action={cancelWorkOrder}>
             <input type="hidden" name="workOrderId" value={wo.id} />
-            <button type="submit">Cancel</button>
+            <Button type="submit" variant="danger">Cancel</Button>
           </form>
         )}
         {wo.status === "completed" && <p>✅ Completed. Output lot created and genealogy recorded.</p>}

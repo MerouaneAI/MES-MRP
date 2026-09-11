@@ -9,6 +9,8 @@ import { can } from "@/lib/authz"
 import { PageHeader } from "@/components/ui/page-header"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 import { Badge, StatusBadge } from "@/components/ui/badge"
+import { Field, Select } from "@/components/ui/field"
+import { Button } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
 
@@ -24,25 +26,25 @@ export default async function DocumentsPage() {
       <PageHeader title="Documents" />
 
       {canWrite && (
-        <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginBottom: 24 }}>
-          <form action={enqueuePoPdf} style={{ display: "flex", gap: 8, alignItems: "end" }}>
-            <label>PO PDF
-              <select name="poId" required defaultValue="">
+        <div className="flex flex-wrap gap-6 mb-6">
+          <form action={enqueuePoPdf} className="flex items-end gap-2">
+            <Field label="PO PDF">
+              <Select name="poId" required defaultValue="">
                 <option value="" disabled>Choose PO…</option>
                 {poOptions.map((p) => <option key={p.id} value={p.id}>{p.id.slice(0, 8)}</option>)}
-              </select>
-            </label>
-            <button type="submit">Generate PO PDF</button>
+              </Select>
+            </Field>
+            <Button type="submit" size="sm">Generate PO PDF</Button>
           </form>
 
-          <form action={enqueueCoaPdf} style={{ display: "flex", gap: 8, alignItems: "end" }}>
-            <label>CoA PDF
-              <select name="lotId" required defaultValue="">
+          <form action={enqueueCoaPdf} className="flex items-end gap-2">
+            <Field label="CoA PDF">
+              <Select name="lotId" required defaultValue="">
                 <option value="" disabled>Choose lot…</option>
                 {lotOptions.map((l) => <option key={l.id} value={l.id}>{l.lotNumber}</option>)}
-              </select>
-            </label>
-            <button type="submit">Generate CoA PDF</button>
+              </Select>
+            </Field>
+            <Button type="submit" size="sm">Generate CoA PDF</Button>
           </form>
         </div>
       )}

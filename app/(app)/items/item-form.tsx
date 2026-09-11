@@ -3,6 +3,8 @@
 import Link from "next/link"
 import { useActionState } from "react"
 import type { FormState } from "@/lib/types"
+import { Field, Input, Select } from "@/components/ui/field"
+import { Button, buttonClass } from "@/components/ui/button"
 
 type Defaults = Partial<{ kind: string; sku: string; name: string; unit: string; shelfLifeDays: string }>
 
@@ -19,29 +21,36 @@ export function ItemForm({
   const fieldErrors = state && !state.ok ? state.fieldErrors : undefined
 
   return (
-    <form action={formAction} style={{ display: "grid", gap: 10, maxWidth: 480 }}>
-      {state && !state.ok && <p style={{ color: "crimson" }}>{state.error}</p>}
+    <form action={formAction} className="grid gap-4 max-w-lg">
+      {state && !state.ok && <p className="text-danger text-sm">{state.error}</p>}
 
-      <label>Kind
-        <select name="kind" defaultValue={defaults?.kind ?? "raw_material"}>
+      <Field label="Kind">
+        <Select name="kind" defaultValue={defaults?.kind ?? "raw_material"}>
           <option value="raw_material">Raw material</option>
           <option value="finished_good">Finished good</option>
           <option value="wip">WIP</option>
-        </select>
-      </label>
+        </Select>
+      </Field>
 
-      <label>SKU *<input name="sku" defaultValue={defaults?.sku ?? ""} required /></label>
-      {fieldErrors?.sku && <span style={{ color: "crimson" }}>{fieldErrors.sku[0]}</span>}
+      <Field label="SKU" required error={fieldErrors?.sku?.[0]}>
+        <Input name="sku" defaultValue={defaults?.sku ?? ""} required />
+      </Field>
 
-      <label>Name *<input name="name" defaultValue={defaults?.name ?? ""} required /></label>
-      {fieldErrors?.name && <span style={{ color: "crimson" }}>{fieldErrors.name[0]}</span>}
+      <Field label="Name" required error={fieldErrors?.name?.[0]}>
+        <Input name="name" defaultValue={defaults?.name ?? ""} required />
+      </Field>
 
-      <label>Unit<input name="unit" defaultValue={defaults?.unit ?? "kg"} /></label>
-      <label>Shelf life (days)<input name="shelfLifeDays" defaultValue={defaults?.shelfLifeDays ?? ""} placeholder="optional" /></label>
+      <Field label="Unit">
+        <Input name="unit" defaultValue={defaults?.unit ?? "kg"} />
+      </Field>
 
-      <div style={{ display: "flex", gap: 12 }}>
-        <button type="submit" disabled={pending}>{pending ? "Saving…" : submitLabel}</button>
-        <Link href="/items">Cancel</Link>
+      <Field label="Shelf life (days)">
+        <Input name="shelfLifeDays" defaultValue={defaults?.shelfLifeDays ?? ""} placeholder="optional" />
+      </Field>
+
+      <div className="flex items-center gap-3">
+        <Button type="submit" disabled={pending}>{pending ? "Saving…" : submitLabel}</Button>
+        <Link href="/items" className={buttonClass({ variant: "ghost" })}>Cancel</Link>
       </div>
     </form>
   )

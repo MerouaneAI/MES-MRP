@@ -10,6 +10,7 @@ import { AddLineForm } from "../add-line-form"
 import { PageHeader } from "@/components/ui/page-header"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 import { StatusBadge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
 
@@ -46,7 +47,7 @@ export default async function PurchaseOrderPage({ params }: { params: Promise<{ 
                     <form action={removePurchaseOrderLine}>
                       <input type="hidden" name="lineId" value={l.id} />
                       <input type="hidden" name="poId" value={po.id} />
-                      <button type="submit">Remove</button>
+                      <Button type="submit" variant="danger" size="sm">Remove</Button>
                     </form>
                   </TD>
                 )}
@@ -58,17 +59,17 @@ export default async function PurchaseOrderPage({ params }: { params: Promise<{ 
 
       {editable && <AddLineForm poId={po.id} items={itemOptions} />}
 
-      <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
+      <div className="flex gap-3 mt-6">
         {po.status === "draft" && (
           <form action={markOrdered}>
             <input type="hidden" name="poId" value={po.id} />
-            <button type="submit">Mark as ordered</button>
+            <Button type="submit">Mark as ordered</Button>
           </form>
         )}
         {po.status === "ordered" && (
           <form action={receivePurchaseOrder}>
             <input type="hidden" name="poId" value={po.id} />
-            <button type="submit">Receive → create lots</button>
+            <Button type="submit">Receive → create lots</Button>
           </form>
         )}
         {po.status === "received" && <p>✅ Received. Inventory lots were created.</p>}
