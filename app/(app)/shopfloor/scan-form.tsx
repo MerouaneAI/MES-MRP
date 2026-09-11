@@ -3,8 +3,7 @@
 import { useActionState } from "react"
 import { scanBarcode } from "@/app/actions/shopfloor"
 import type { ScanResult } from "@/lib/types"
-import { Input } from "@/components/ui/field"
-import { Button } from "@/components/ui/button"
+import { Input, Button } from "@/components/ui"
 
 export function ScanForm() {
   const [state, formAction, pending] = useActionState<ScanResult | null, FormData>(scanBarcode, null)

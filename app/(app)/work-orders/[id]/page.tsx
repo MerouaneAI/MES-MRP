@@ -1,17 +1,17 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { eq } from "drizzle-orm"
+import { Layers } from "lucide-react"
 import { db } from "@/db"
 import { workOrders, workOrderMaterials, boms } from "@/db/schema/production"
 import { items, lots, lotGenealogy } from "@/db/schema/inventory"
 import { cancelWorkOrder } from "@/app/actions/work-orders"
 import { ReleaseButton, CompleteButton } from "../wo-buttons"
-import { PageHeader } from "@/components/ui/page-header"
-import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
-import { StatusBadge } from "@/components/ui/badge"
-import { Button, buttonClass } from "@/components/ui/button"
-import { EmptyState } from "@/components/ui/empty-state"
-import { Layers } from "lucide-react"
+import {
+  PageHeader, Panel, Table, THead, TH, TBody, TR, TD,
+  StatusBadge, EmptyState, Button, buttonClass,
+} from "@/components/ui"
+import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
@@ -41,43 +41,52 @@ export default async function WorkOrderDetailPage({ params }: { params: Promise<
   return (
     <div className="space-y-6">
       <Link href="/work-orders" className={buttonClass({ variant: "ghost", size: "sm" })}>← Back to work orders</Link>
-      <PageHeader title={`Work order — ${product?.name}`} />
-      <p>Status: <StatusBadge status={wo.status} /> · BOM v{bom?.version} · Planned: <b>{wo.quantityPlanned}</b> · Produced: <b>{wo.quantityProduced}</b></p>
+      <PageHeader
+        title={`Work order — ${product?.name}`}
+        description={`BOM v${bom?.version} · planned ${wo.quantityPlanned} · produced ${wo.quantityProduced}`}
+        actions={<StatusBadge status={wo.status} />}
+      />
 
-      <h2>Materials (MRP explosion)</h2>
-      {materials.length === 0 ? <EmptyState icon={Layers} title="Not yet released" description="Release this work order to run the MRP explosion." /> : (
-        <Table>
-          <THead><TH>Component</TH><TH className="text-right">Required</TH></THead>
-          <TBody>
-            {materials.map((m) => (
-              <TR key={m.id}>
-                <TD>{m.name} <span className="text-ink-muted">({m.sku})</span></TD>
-                <TD align="right">{m.quantityRequired} {m.unit}</TD>
-              </TR>
-            ))}
-          </TBody>
-        </Table>
-      )}
+      <Panel title="Materials" subtitle="MRP explosion (snapshot at release)">
+        {materials.length === 0 ? (
+          <EmptyState icon={Layers} title="Not yet released" description="Release this work order to run the MRP explosion." />
+        ) : (
+          <Reveal>
+            <Table>
+              <THead><TH>Component</TH><TH className="text-right">Required</TH></THead>
+              <TBody>
+                {materials.map((m) => (
+                  <TR key={m.id}>
+                    <TD className="font-medium">{m.name} <span className="text-ink-faint font-normal">({m.sku})</span></TD>
+                    <TD align="right">{m.quantityRequired} {m.unit}</TD>
+                  </TR>
+                ))}
+              </TBody>
+            </Table>
+          </Reveal>
+        )}
+      </Panel>
 
       {genealogy.length > 0 && (
-        <>
-          <h2>Traceability (consumed lots → output)</h2>
-          <Table>
-            <THead><TH>Input lot</TH><TH>Material</TH><TH className="text-right">Qty used</TH></THead>
-            <TBody>
-              {genealogy.map((g) => (
-                <TR key={g.id}>
-                  <TD>{g.lotNumber}</TD>
-                  <TD>{g.itemName}</TD>
-                  <TD align="right">{g.quantityUsed}</TD>
-                </TR>
-              ))}
-            </TBody>
-          </Table>
-        </>
+        <Panel title="Traceability" subtitle="Consumed lots → output">
+          <Reveal>
+            <Table>
+              <THead><TH>Input lot</TH><TH>Material</TH><TH className="text-right">Qty used</TH></THead>
+              <TBody>
+                {genealogy.map((g) => (
+                  <TR key={g.id}>
+                    <TD className="font-medium">{g.lotNumber}</TD>
+                    <TD>{g.itemName}</TD>
+                    <TD align="right">{g.quantityUsed}</TD>
+                  </TR>
+                ))}
+              </TBody>
+            </Table>
+          </Reveal>
+        </Panel>
       )}
 
-      <div className="flex gap-4 mt-6 items-start">
+      <div className="flex gap-4 items-start">
         {wo.status === "planned" && <ReleaseButton workOrderId={wo.id} />}
         {wo.status === "released" && <CompleteButton workOrderId={wo.id} />}
         {(wo.status === "planned" || wo.status === "released") && (
@@ -86,8 +95,8 @@ export default async function WorkOrderDetailPage({ params }: { params: Promise<
             <Button type="submit" variant="danger">Cancel</Button>
           </form>
         )}
-        {wo.status === "completed" && <p>✅ Completed. Output lot created and genealogy recorded.</p>}
-        {wo.status === "cancelled" && <p>Cancelled.</p>}
+        {wo.status === "completed" && <p className="text-sm text-success">✅ Completed. Output lot created and genealogy recorded.</p>}
+        {wo.status === "cancelled" && <p className="text-sm text-ink-muted">Cancelled.</p>}
       </div>
     </div>
   )

@@ -3,7 +3,7 @@ import { db } from "@/db"
 import { boms } from "@/db/schema/production"
 import { items } from "@/db/schema/inventory"
 import { NewEcoForm } from "./new-eco-form"
-import { PageHeader } from "@/components/ui/page-header"
+import { PageHeader } from "@/components/ui"
 
 export const dynamic = "force-dynamic"
 

@@ -3,7 +3,7 @@ import { db } from "@/db"
 import { boms, workCenters } from "@/db/schema/production"
 import { items } from "@/db/schema/inventory"
 import { NewWorkOrderForm } from "./new-wo-form"
-import { PageHeader } from "@/components/ui/page-header"
+import { PageHeader } from "@/components/ui"
 
 export const dynamic = "force-dynamic"
 

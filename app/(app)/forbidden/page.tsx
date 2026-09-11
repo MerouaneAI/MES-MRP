@@ -1,6 +1,5 @@
 import Link from "next/link"
-import { PageHeader } from "@/components/ui/page-header"
-import { buttonClass } from "@/components/ui/button"
+import { PageHeader, buttonClass } from "@/components/ui"
 
 export default function ForbiddenPage() {
   return (

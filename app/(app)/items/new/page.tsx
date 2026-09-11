@@ -1,7 +1,7 @@
 // app/items/new/page.tsx
 import { createItem } from "@/app/actions/items"
 import { ItemForm } from "../item-form"
-import { PageHeader } from "@/components/ui/page-header"
+import { PageHeader } from "@/components/ui"
 
 export default function NewItemPage() {
   return (

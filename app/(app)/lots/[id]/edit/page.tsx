@@ -5,7 +5,7 @@ import { db } from "@/db"
 import { lots, items } from "@/db/schema/inventory"
 import { updateLot } from "@/app/actions/lots"
 import { LotForm } from "../../lot-form"
-import { PageHeader } from "@/components/ui/page-header"
+import { PageHeader } from "@/components/ui"
 
 export const dynamic = "force-dynamic"
 

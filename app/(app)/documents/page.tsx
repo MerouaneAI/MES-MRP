@@ -1,4 +1,5 @@
 import { asc, desc } from "drizzle-orm"
+import { FileDown } from "lucide-react"
 import { db } from "@/db"
 import { documents } from "@/db/schema/documents"
 import { purchaseOrders } from "@/db/schema/purchases"
@@ -6,13 +7,11 @@ import { lots } from "@/db/schema/inventory"
 import { enqueuePoPdf, enqueueCoaPdf } from "@/app/actions/documents"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
-import { PageHeader } from "@/components/ui/page-header"
-import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
-import { Badge, StatusBadge } from "@/components/ui/badge"
-import { Field, Select } from "@/components/ui/field"
-import { Button, buttonClass } from "@/components/ui/button"
-import { EmptyState } from "@/components/ui/empty-state"
-import { FileDown } from "lucide-react"
+import {
+  PageHeader, Table, THead, TH, TBody, TR, TD,
+  Badge, StatusBadge, EmptyState, Field, Select, Button, buttonClass,
+} from "@/components/ui"
+import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
@@ -25,10 +24,10 @@ export default async function DocumentsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Documents" />
+      <PageHeader title="Documents" description="Generated PDFs for purchase orders and certificates." />
 
       {canWrite && (
-        <div className="flex flex-wrap gap-6 mb-6">
+        <div className="flex flex-wrap gap-6">
           <form action={enqueuePoPdf} className="flex items-end gap-2">
             <Field label="PO PDF">
               <Select name="poId" required defaultValue="">
@@ -51,24 +50,28 @@ export default async function DocumentsPage() {
         </div>
       )}
 
-      {docs.length === 0 ? <EmptyState icon={FileDown} title="No documents yet" description="Generate a PO or CoA PDF above." /> : (
-        <Table>
-          <THead><TH>Kind</TH><TH>Ref</TH><TH>Status</TH><TH /></THead>
-          <TBody>
-            {docs.map((d) => (
-              <TR key={d.id}>
-                <TD><Badge>{d.kind}</Badge></TD>
-                <TD>{d.refId.slice(0, 8)}</TD>
-                <TD><StatusBadge status={d.status} />{d.error ? ` — ${d.error}` : ""}</TD>
-                <TD>{d.status === "done" ? <a href={`/api/documents/${d.id}`} className={buttonClass({ variant: "ghost", size: "sm" })}>Download</a> : "—"}</TD>
-              </TR>
-            ))}
-          </TBody>
-        </Table>
+      {docs.length === 0 ? (
+        <EmptyState icon={FileDown} title="No documents yet" description="Generate a PO or CoA PDF above." />
+      ) : (
+        <Reveal className="card p-2">
+          <Table>
+            <THead><TH>Kind</TH><TH>Ref</TH><TH>Status</TH><TH /></THead>
+            <TBody>
+              {docs.map((d) => (
+                <TR key={d.id}>
+                  <TD><Badge>{d.kind}</Badge></TD>
+                  <TD className="font-medium">{d.refId.slice(0, 8)}</TD>
+                  <TD><StatusBadge status={d.status} />{d.error ? ` — ${d.error}` : ""}</TD>
+                  <TD>{d.status === "done" ? <a href={`/api/documents/${d.id}`} className={buttonClass({ variant: "ghost", size: "sm" })}>Download</a> : "—"}</TD>
+                </TR>
+              ))}
+            </TBody>
+          </Table>
+        </Reveal>
       )}
 
-      <p className="text-ink-faint mt-4 text-xs">
-        Jobs are processed by the worker (<code>npm run worker</code>). Refresh after a moment to see the status change to “done”.
+      <p className="text-ink-faint text-xs">
+        Jobs are processed by the worker (<code>npm run worker</code>). Refresh after a moment to see the status change to \u201cdone\u201d.
       </p>
     </div>
   )

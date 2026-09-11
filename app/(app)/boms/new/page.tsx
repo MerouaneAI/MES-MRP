@@ -2,7 +2,7 @@ import { asc, inArray } from "drizzle-orm"
 import { db } from "@/db"
 import { items } from "@/db/schema/inventory"
 import { NewBomForm } from "./new-bom-form"
-import { PageHeader } from "@/components/ui/page-header"
+import { PageHeader } from "@/components/ui"
 
 export const dynamic = "force-dynamic"
 

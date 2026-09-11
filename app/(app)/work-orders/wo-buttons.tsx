@@ -3,7 +3,7 @@
 import { useActionState } from "react"
 import { releaseWorkOrder, completeWorkOrder } from "@/app/actions/work-orders"
 import type { FormState } from "@/lib/types"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui"
 
 export function ReleaseButton({ workOrderId }: { workOrderId: string }) {
   const action = releaseWorkOrder.bind(null, workOrderId)

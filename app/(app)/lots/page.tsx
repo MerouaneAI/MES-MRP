@@ -1,15 +1,16 @@
 import Link from "next/link"
 import { asc, eq } from "drizzle-orm"
+import { Boxes } from "lucide-react"
 import { db } from "@/db"
 import { lots, items } from "@/db/schema/inventory"
 import { deleteLot } from "@/app/actions/lots"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
-import { PageHeader } from "@/components/ui/page-header"
-import { Button, buttonClass } from "@/components/ui/button"
-import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
-import { EmptyState } from "@/components/ui/empty-state"
-import { Boxes } from "lucide-react"
+import {
+  PageHeader, Table, THead, TH, TBody, TR, TD,
+  EmptyState, Button, buttonClass,
+} from "@/components/ui"
+import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
@@ -46,34 +47,42 @@ export default async function LotsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Inventory (lots)"
+        description="Lot-based inventory with FEFO tracking."
         actions={canWrite ? <Link href="/lots/new" className={buttonClass()}>+ Add lot</Link> : undefined}
       />
-      {rows.length === 0 ? <EmptyState icon={Boxes} title="No lots yet" description="Create a lot or receive a purchase order." action={canWrite ? <Link href="/lots/new" className={buttonClass()}>+ Add lot</Link> : undefined} /> : (
-        <Table>
-          <THead><TH>Item</TH><TH>Lot #</TH><TH className="text-right">On hand</TH><TH>Expiry (FEFO)</TH><TH /></THead>
-          <TBody>
-            {rows.map((l) => {
-              const badge = expiryBadge(l.expiresAt)
-              return (
-                <TR key={l.id}>
-                  <TD>{l.itemName} <span className="text-ink-muted">({l.itemSku})</span></TD>
-                  <TD>{l.lotNumber}</TD>
-                  <TD align="right">{l.quantityOnHand} {l.unit}</TD>
-                  <TD><span className={badge.className}>{badge.label}</span></TD>
-                  <TD className="flex items-center gap-2">
-                    {canWrite && <Link href={`/lots/${l.id}/edit`} className={buttonClass({ variant: "ghost", size: "sm" })}>Edit</Link>}
-                    {canDelete && (
-                      <form action={deleteLot}>
-                        <input type="hidden" name="id" value={l.id} />
-                        <Button type="submit" variant="danger" size="sm">Delete</Button>
-                      </form>
-                    )}
-                  </TD>
-                </TR>
-              )
-            })}
-          </TBody>
-        </Table>
+      {rows.length === 0 ? (
+        <EmptyState icon={Boxes} title="No lots yet" description="Create a lot or receive a purchase order."
+          action={canWrite ? <Link href="/lots/new" className={buttonClass({ size: "sm" })}>+ Add lot</Link> : undefined} />
+      ) : (
+        <Reveal className="card p-2">
+          <Table>
+            <THead><TH>Item</TH><TH>Lot #</TH><TH className="text-right">On hand</TH><TH>Expiry (FEFO)</TH><TH className="text-right">Actions</TH></THead>
+            <TBody>
+              {rows.map((l) => {
+                const badge = expiryBadge(l.expiresAt)
+                return (
+                  <TR key={l.id}>
+                    <TD>{l.itemName} <span className="text-ink-muted">({l.itemSku})</span></TD>
+                    <TD className="font-medium">{l.lotNumber}</TD>
+                    <TD align="right">{l.quantityOnHand} {l.unit}</TD>
+                    <TD><span className={badge.className}>{badge.label}</span></TD>
+                    <TD align="right">
+                      <div className="flex justify-end gap-2">
+                        {canWrite && <Link href={`/lots/${l.id}/edit`} className={buttonClass({ variant: "ghost", size: "sm" })}>Edit</Link>}
+                        {canDelete && (
+                          <form action={deleteLot}>
+                            <input type="hidden" name="id" value={l.id} />
+                            <Button type="submit" variant="danger" size="sm">Delete</Button>
+                          </form>
+                        )}
+                      </div>
+                    </TD>
+                  </TR>
+                )
+              })}
+            </TBody>
+          </Table>
+        </Reveal>
       )}
     </div>
   )

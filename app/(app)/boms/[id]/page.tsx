@@ -1,17 +1,17 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { and, asc, eq, ne } from "drizzle-orm"
+import { ListPlus } from "lucide-react"
 import { db } from "@/db"
 import { boms, bomLines } from "@/db/schema/production"
 import { items } from "@/db/schema/inventory"
 import { activateBom, removeBomLine } from "@/app/actions/boms"
 import { BomLineForm } from "../bom-line-form"
-import { PageHeader } from "@/components/ui/page-header"
-import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
-import { StatusBadge } from "@/components/ui/badge"
-import { Button, buttonClass } from "@/components/ui/button"
-import { EmptyState } from "@/components/ui/empty-state"
-import { ListPlus } from "lucide-react"
+import {
+  PageHeader, Panel, Table, THead, TH, TBody, TR, TD,
+  StatusBadge, EmptyState, Button, buttonClass,
+} from "@/components/ui"
+import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
@@ -42,45 +42,53 @@ export default async function BomDetailPage({ params }: { params: Promise<{ id: 
   return (
     <div className="space-y-6">
       <Link href="/boms" className={buttonClass({ variant: "ghost", size: "sm" })}>← Back to BOMs</Link>
-      <PageHeader title={`${product?.name} — v${bom.version}`} />
-      <p>Status: <StatusBadge status={bom.status} />{bom.notes ? ` · ${bom.notes}` : ""}</p>
+      <PageHeader
+        title={`${product?.name} — v${bom.version}`}
+        description={bom.notes ? `${bom.notes}` : undefined}
+        actions={<StatusBadge status={bom.status} />}
+      />
 
-      <h2>Components</h2>
-      {lines.length === 0 ? <EmptyState icon={ListPlus} title="No components yet" description="Add materials to this BOM." /> : (
-        <Table>
-          <THead><TH>Component</TH><TH className="text-right">Qty per unit</TH>{editable && <TH />}</THead>
-          <TBody>
-            {lines.map((l) => (
-              <TR key={l.id}>
-                <TD>{l.componentName} <span className="text-ink-muted">({l.componentSku})</span></TD>
-                <TD align="right">{l.quantityPer} {l.unit}</TD>
-                {editable && (
-                  <TD>
-                    <form action={removeBomLine}>
-                      <input type="hidden" name="lineId" value={l.id} />
-                      <input type="hidden" name="bomId" value={bom.id} />
-                      <Button type="submit" variant="danger" size="sm">Remove</Button>
-                    </form>
-                  </TD>
-                )}
-              </TR>
-            ))}
-          </TBody>
-        </Table>
-      )}
+      <Panel title="Components">
+        {lines.length === 0 ? (
+          <EmptyState icon={ListPlus} title="No components yet" description="Add materials to this BOM." />
+        ) : (
+          <Reveal>
+            <Table>
+              <THead><TH>Component</TH><TH className="text-right">Qty per unit</TH>{editable && <TH className="text-right">Actions</TH>}</THead>
+              <TBody>
+                {lines.map((l) => (
+                  <TR key={l.id}>
+                    <TD className="font-medium">{l.componentName} <span className="text-ink-muted font-normal">({l.componentSku})</span></TD>
+                    <TD align="right">{l.quantityPer} {l.unit}</TD>
+                    {editable && (
+                      <TD align="right">
+                        <form action={removeBomLine}>
+                          <input type="hidden" name="lineId" value={l.id} />
+                          <input type="hidden" name="bomId" value={bom.id} />
+                          <Button type="submit" variant="danger" size="sm">Remove</Button>
+                        </form>
+                      </TD>
+                    )}
+                  </TR>
+                ))}
+              </TBody>
+            </Table>
+          </Reveal>
+        )}
+      </Panel>
 
       {editable && <BomLineForm bomId={bom.id} components={components} />}
 
-      <div className="mt-6">
+      <div>
         {canActivate && (
           <form action={activateBom}>
             <input type="hidden" name="bomId" value={bom.id} />
             <Button type="submit">Activate this version</Button>
           </form>
         )}
-        {editable && active && <p>An active version already exists — publish this one through an <Link href="/eco/new">ECO</Link>.</p>}
-        {bom.status === "active" && <p>✅ This is the active recipe.</p>}
-        {bom.status === "archived" && <p>Archived (superseded by a newer version).</p>}
+        {editable && active && <p className="text-sm text-ink-muted mt-2">An active version already exists — publish this one through an <Link href="/eco/new" className="text-gold hover:underline">ECO</Link>.</p>}
+        {bom.status === "active" && <p className="text-sm text-success">✅ This is the active recipe.</p>}
+        {bom.status === "archived" && <p className="text-sm text-ink-muted">Archived (superseded by a newer version).</p>}
       </div>
     </div>
   )

@@ -1,4 +1,5 @@
 import { asc, eq, inArray } from "drizzle-orm"
+import { Factory } from "lucide-react"
 import { db } from "@/db"
 import { workOrders, workOrderMaterials } from "@/db/schema/production"
 import { items } from "@/db/schema/inventory"
@@ -6,9 +7,8 @@ import { DispatchBoardLive } from "./dispatch-board-live"
 import { ScanForm } from "./scan-form"
 import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
-import { PageHeader } from "@/components/ui/page-header"
-import { EmptyState } from "@/components/ui/empty-state"
-import { Factory } from "lucide-react"
+import { PageHeader, EmptyState } from "@/components/ui"
+import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
@@ -50,11 +50,14 @@ export default async function ShopFloorPage() {
     <div className="space-y-6">
       <PageHeader
         title="Shop-floor dispatch"
+        description="Live view of released work orders."
         actions={<DispatchBoardLive />}
       />
 
-      {released.length === 0 ? <EmptyState icon={Factory} title="No released work orders" description="Release a work order to see it here." /> : (
-        <div className="grid gap-4 mt-4 grid-cols-[repeat(auto-fill,minmax(280px,1fr))]">
+      {released.length === 0 ? (
+        <EmptyState icon={Factory} title="No released work orders" description="Release a work order to see it here." />
+      ) : (
+        <Reveal className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(280px,1fr))]">
           {released.map((w) => (
             <section key={w.id} className="card p-4">
               <h3 className="m-0 font-serif text-ink">{w.productName}</h3>
@@ -66,7 +69,7 @@ export default async function ShopFloorPage() {
               </ul>
             </section>
           ))}
-        </div>
+        </Reveal>
       )}
 
       {canWrite && <ScanForm />}

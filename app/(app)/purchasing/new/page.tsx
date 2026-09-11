@@ -3,7 +3,7 @@ import { asc, inArray } from "drizzle-orm"
 import { db } from "@/db"
 import { parties } from "@/db/schema/parties"
 import { NewPurchaseOrderForm } from "../new-po-form"
-import { PageHeader } from "@/components/ui/page-header"
+import { PageHeader } from "@/components/ui"
 
 export const dynamic = "force-dynamic"
 

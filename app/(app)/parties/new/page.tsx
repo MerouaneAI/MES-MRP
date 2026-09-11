@@ -1,6 +1,6 @@
 import { createParty } from "@/app/actions/parties"
 import { PartyForm } from "../party-form"
-import { PageHeader } from "@/components/ui/page-header"
+import { PageHeader } from "@/components/ui"
 
 export default function NewPartyPage() {
   return (

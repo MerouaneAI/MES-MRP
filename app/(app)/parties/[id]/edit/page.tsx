@@ -4,7 +4,7 @@ import { db } from "@/db"
 import { parties } from "@/db/schema/parties"
 import { updateParty } from "@/app/actions/parties"
 import { PartyForm } from "../../party-form"
-import { PageHeader } from "@/components/ui/page-header"
+import { PageHeader } from "@/components/ui"
 
 export default async function EditPartyPage({
   params,

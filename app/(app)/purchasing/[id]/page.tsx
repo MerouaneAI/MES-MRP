@@ -1,18 +1,18 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { asc, eq } from "drizzle-orm"
+import { ListPlus } from "lucide-react"
 import { db } from "@/db"
 import { purchaseOrders, purchaseOrderLines } from "@/db/schema/purchases"
 import { parties } from "@/db/schema/parties"
 import { items } from "@/db/schema/inventory"
 import { markOrdered, receivePurchaseOrder, removePurchaseOrderLine } from "@/app/actions/purchasing"
 import { AddLineForm } from "../add-line-form"
-import { PageHeader } from "@/components/ui/page-header"
-import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
-import { StatusBadge } from "@/components/ui/badge"
-import { Button, buttonClass } from "@/components/ui/button"
-import { EmptyState } from "@/components/ui/empty-state"
-import { ListPlus } from "lucide-react"
+import {
+  PageHeader, Panel, Table, THead, TH, TBody, TR, TD,
+  StatusBadge, EmptyState, Button, buttonClass,
+} from "@/components/ui"
+import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
@@ -30,38 +30,46 @@ export default async function PurchaseOrderPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-6">
       <Link href="/purchasing" className={buttonClass({ variant: "ghost", size: "sm" })}>← Back to purchasing</Link>
-      <PageHeader title="Purchase order" />
-      <p>Supplier: <b>{supplier?.name ?? "—"}</b> · Status: <StatusBadge status={po.status} /> · Total: <b>{po.totalAmount} DZD</b></p>
+      <PageHeader
+        title="Purchase order"
+        description={`Supplier: ${supplier?.name ?? "—"} · Total: ${po.totalAmount} DZD`}
+        actions={<StatusBadge status={po.status} />}
+      />
 
-      <h2>Lines</h2>
-      {lines.length === 0 ? <EmptyState icon={ListPlus} title="No lines yet" description="Add items to this purchase order." /> : (
-        <Table>
-          <THead><TH>Item</TH><TH className="text-right">Qty</TH><TH className="text-right">Unit price</TH><TH className="text-right">Line total</TH>{editable && <TH />}</THead>
-          <TBody>
-            {lines.map((l) => (
-              <TR key={l.id}>
-                <TD>{l.description ?? l.itemId}</TD>
-                <TD align="right">{l.quantity}</TD>
-                <TD align="right">{l.unitPrice}</TD>
-                <TD align="right">{l.lineTotal}</TD>
-                {editable && (
-                  <TD>
-                    <form action={removePurchaseOrderLine}>
-                      <input type="hidden" name="lineId" value={l.id} />
-                      <input type="hidden" name="poId" value={po.id} />
-                      <Button type="submit" variant="danger" size="sm">Remove</Button>
-                    </form>
-                  </TD>
-                )}
-              </TR>
-            ))}
-          </TBody>
-        </Table>
-      )}
+      <Panel title="Lines">
+        {lines.length === 0 ? (
+          <EmptyState icon={ListPlus} title="No lines yet" description="Add items to this purchase order." />
+        ) : (
+          <Reveal>
+            <Table>
+              <THead><TH>Item</TH><TH className="text-right">Qty</TH><TH className="text-right">Unit price</TH><TH className="text-right">Line total</TH>{editable && <TH className="text-right">Actions</TH>}</THead>
+              <TBody>
+                {lines.map((l) => (
+                  <TR key={l.id}>
+                    <TD className="font-medium">{l.description ?? l.itemId}</TD>
+                    <TD align="right">{l.quantity}</TD>
+                    <TD align="right">{l.unitPrice}</TD>
+                    <TD align="right">{l.lineTotal}</TD>
+                    {editable && (
+                      <TD align="right">
+                        <form action={removePurchaseOrderLine}>
+                          <input type="hidden" name="lineId" value={l.id} />
+                          <input type="hidden" name="poId" value={po.id} />
+                          <Button type="submit" variant="danger" size="sm">Remove</Button>
+                        </form>
+                      </TD>
+                    )}
+                  </TR>
+                ))}
+              </TBody>
+            </Table>
+          </Reveal>
+        )}
+      </Panel>
 
       {editable && <AddLineForm poId={po.id} items={itemOptions} />}
 
-      <div className="flex gap-3 mt-6">
+      <div className="flex gap-3">
         {po.status === "draft" && (
           <form action={markOrdered}>
             <input type="hidden" name="poId" value={po.id} />
@@ -74,7 +82,7 @@ export default async function PurchaseOrderPage({ params }: { params: Promise<{ 
             <Button type="submit">Receive → create lots</Button>
           </form>
         )}
-        {po.status === "received" && <p>✅ Received. Inventory lots were created.</p>}
+        {po.status === "received" && <p className="text-sm text-success">✅ Received. Inventory lots were created.</p>}
       </div>
     </div>
   )
