@@ -10,6 +10,8 @@ import { PageHeader } from "@/components/ui/page-header"
 import { Button, buttonClass } from "@/components/ui/button"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { EmptyState } from "@/components/ui/empty-state"
+import { Package } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -24,7 +26,7 @@ export default async function ItemsPage() {
         title="Items"
         actions={canWrite ? <Link href="/items/new" className={buttonClass()}>+ Add item</Link> : undefined}
       />
-      {rows.length === 0 ? <p>No items yet.</p> : (
+      {rows.length === 0 ? <EmptyState icon={Package} title="No items yet" description="Add your first raw material or finished good." action={canWrite ? <Link href="/items/new" className={buttonClass()}>+ Add item</Link> : undefined} /> : (
         <Table>
           <THead><TH>SKU</TH><TH>Name</TH><TH>Kind</TH><TH>Unit</TH><TH /></THead>
           <TBody>

@@ -9,6 +9,8 @@ import { PageHeader } from "@/components/ui/page-header"
 import { buttonClass } from "@/components/ui/button"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 import { StatusBadge } from "@/components/ui/badge"
+import { EmptyState } from "@/components/ui/empty-state"
+import { ClipboardList } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -27,7 +29,7 @@ export default async function BomsPage() {
         title="Bills of materials"
         actions={canWrite ? <Link href="/boms/new" className={buttonClass()}>+ New BOM</Link> : undefined}
       />
-      {rows.length === 0 ? <p>No BOMs yet.</p> : (
+      {rows.length === 0 ? <EmptyState icon={ClipboardList} title="No BOMs yet" description="Create a bill of materials for a product." action={canWrite ? <Link href="/boms/new" className={buttonClass()}>+ New BOM</Link> : undefined} /> : (
         <Table>
           <THead><TH>Product</TH><TH className="text-right">Version</TH><TH>Status</TH><TH /></THead>
           <TBody>

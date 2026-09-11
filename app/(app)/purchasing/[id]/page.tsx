@@ -11,6 +11,8 @@ import { PageHeader } from "@/components/ui/page-header"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 import { StatusBadge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { EmptyState } from "@/components/ui/empty-state"
+import { ListPlus } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -32,7 +34,7 @@ export default async function PurchaseOrderPage({ params }: { params: Promise<{ 
       <p>Supplier: <b>{supplier?.name ?? "—"}</b> · Status: <StatusBadge status={po.status} /> · Total: <b>{po.totalAmount} DZD</b></p>
 
       <h2>Lines</h2>
-      {lines.length === 0 ? <p>No lines yet.</p> : (
+      {lines.length === 0 ? <EmptyState icon={ListPlus} title="No lines yet" description="Add items to this purchase order." /> : (
         <Table>
           <THead><TH>Item</TH><TH className="text-right">Qty</TH><TH className="text-right">Unit price</TH><TH className="text-right">Line total</TH>{editable && <TH />}</THead>
           <TBody>

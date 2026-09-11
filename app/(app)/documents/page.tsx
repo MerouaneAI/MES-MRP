@@ -11,6 +11,8 @@ import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 import { Badge, StatusBadge } from "@/components/ui/badge"
 import { Field, Select } from "@/components/ui/field"
 import { Button } from "@/components/ui/button"
+import { EmptyState } from "@/components/ui/empty-state"
+import { FileDown } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -49,7 +51,7 @@ export default async function DocumentsPage() {
         </div>
       )}
 
-      {docs.length === 0 ? <p>No documents yet. Generate one above.</p> : (
+      {docs.length === 0 ? <EmptyState icon={FileDown} title="No documents yet" description="Generate a PO or CoA PDF above." /> : (
         <Table>
           <THead><TH>Kind</TH><TH>Ref</TH><TH>Status</TH><TH /></THead>
           <TBody>

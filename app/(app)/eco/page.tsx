@@ -10,6 +10,8 @@ import { PageHeader } from "@/components/ui/page-header"
 import { Button, buttonClass } from "@/components/ui/button"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 import { StatusBadge } from "@/components/ui/badge"
+import { EmptyState } from "@/components/ui/empty-state"
+import { GitBranch } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -35,7 +37,7 @@ export default async function EcoPage() {
         title="Engineering change orders"
         actions={isAdmin ? <Link href="/eco/new" className={buttonClass()}>+ New ECO</Link> : undefined}
       />
-      {rows.length === 0 ? <p>No ECOs yet.</p> : (
+      {rows.length === 0 ? <EmptyState icon={GitBranch} title="No ECOs yet" description="Create one to manage recipe changes." action={isAdmin ? <Link href="/eco/new" className={buttonClass()}>+ New ECO</Link> : undefined} /> : (
         <Table>
           <THead><TH>Product</TH><TH>Target</TH><TH>Reason</TH><TH>Status</TH><TH /></THead>
           <TBody>

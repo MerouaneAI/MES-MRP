@@ -10,6 +10,8 @@ import { PageHeader } from "@/components/ui/page-header"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 import { StatusBadge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { EmptyState } from "@/components/ui/empty-state"
+import { ListPlus } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -44,7 +46,7 @@ export default async function BomDetailPage({ params }: { params: Promise<{ id: 
       <p>Status: <StatusBadge status={bom.status} />{bom.notes ? ` · ${bom.notes}` : ""}</p>
 
       <h2>Components</h2>
-      {lines.length === 0 ? <p>No components yet.</p> : (
+      {lines.length === 0 ? <EmptyState icon={ListPlus} title="No components yet" description="Add materials to this BOM." /> : (
         <Table>
           <THead><TH>Component</TH><TH className="text-right">Qty per unit</TH>{editable && <TH />}</THead>
           <TBody>

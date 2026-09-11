@@ -9,6 +9,8 @@ import { PageHeader } from "@/components/ui/page-header"
 import { buttonClass } from "@/components/ui/button"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 import { StatusBadge } from "@/components/ui/badge"
+import { EmptyState } from "@/components/ui/empty-state"
+import { Factory } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -31,7 +33,7 @@ export default async function WorkOrdersPage() {
         title="Work orders"
         actions={canWrite ? <Link href="/work-orders/new" className={buttonClass()}>+ New work order</Link> : undefined}
       />
-      {rows.length === 0 ? <p>No work orders yet.</p> : (
+      {rows.length === 0 ? <EmptyState icon={Factory} title="No work orders yet" description="Create one to start production." action={canWrite ? <Link href="/work-orders/new" className={buttonClass()}>+ New work order</Link> : undefined} /> : (
         <Table>
           <THead><TH>Product</TH><TH>Status</TH><TH className="text-right">Planned</TH><TH className="text-right">Produced</TH><TH /></THead>
           <TBody>

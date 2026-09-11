@@ -10,6 +10,8 @@ import { PageHeader } from "@/components/ui/page-header"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 import { StatusBadge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { EmptyState } from "@/components/ui/empty-state"
+import { Layers } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -43,7 +45,7 @@ export default async function WorkOrderDetailPage({ params }: { params: Promise<
       <p>Status: <StatusBadge status={wo.status} /> · BOM v{bom?.version} · Planned: <b>{wo.quantityPlanned}</b> · Produced: <b>{wo.quantityProduced}</b></p>
 
       <h2>Materials (MRP explosion)</h2>
-      {materials.length === 0 ? <p>Not yet released — release to run the MRP explosion.</p> : (
+      {materials.length === 0 ? <EmptyState icon={Layers} title="Not yet released" description="Release this work order to run the MRP explosion." /> : (
         <Table>
           <THead><TH>Component</TH><TH className="text-right">Required</TH></THead>
           <TBody>

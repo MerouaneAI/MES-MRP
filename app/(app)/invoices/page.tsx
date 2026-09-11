@@ -9,6 +9,8 @@ import { can } from "@/lib/authz"
 import { PageHeader } from "@/components/ui/page-header"
 import { buttonClass } from "@/components/ui/button"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
+import { EmptyState } from "@/components/ui/empty-state"
+import { FileText } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -34,7 +36,7 @@ export default async function InvoicesPage() {
         actions={canWrite ? <Link href="/invoices/new" className={buttonClass()}>+ New invoice</Link> : undefined}
       />
       {/* No edit/delete links: invoices are immutable by design. */}
-      {rows.length === 0 ? <p>No invoices yet.</p> : (
+      {rows.length === 0 ? <EmptyState icon={FileText} title="No invoices yet" description="Issue your first invoice to a customer." action={canWrite ? <Link href="/invoices/new" className={buttonClass()}>+ New invoice</Link> : undefined} /> : (
         <Table>
           <THead><TH>Invoice #</TH><TH>Customer</TH><TH className="text-right">Total (DZD)</TH><TH>Issued</TH></THead>
           <TBody>

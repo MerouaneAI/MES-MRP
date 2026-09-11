@@ -9,6 +9,8 @@ import { PageHeader } from "@/components/ui/page-header"
 import { Button, buttonClass } from "@/components/ui/button"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { EmptyState } from "@/components/ui/empty-state"
+import { Users } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -26,7 +28,7 @@ export default async function PartiesPage() {
       />
 
       {rows.length === 0 ? (
-        <p>No parties yet. Add your first one.</p>
+        <EmptyState icon={Users} title="No parties yet" description="Add your first customer or supplier." action={canWrite ? <Link href="/parties/new" className={buttonClass()}>+ Add party</Link> : undefined} />
       ) : (
         <Table>
           <THead>

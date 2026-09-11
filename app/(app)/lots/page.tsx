@@ -8,6 +8,8 @@ import { can } from "@/lib/authz"
 import { PageHeader } from "@/components/ui/page-header"
 import { Button, buttonClass } from "@/components/ui/button"
 import { Table, THead, TH, TBody, TR, TD } from "@/components/ui/table"
+import { EmptyState } from "@/components/ui/empty-state"
+import { Boxes } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -46,7 +48,7 @@ export default async function LotsPage() {
         title="Inventory (lots)"
         actions={canWrite ? <Link href="/lots/new" className={buttonClass()}>+ Add lot</Link> : undefined}
       />
-      {rows.length === 0 ? <p>No lots yet.</p> : (
+      {rows.length === 0 ? <EmptyState icon={Boxes} title="No lots yet" description="Create a lot or receive a purchase order." action={canWrite ? <Link href="/lots/new" className={buttonClass()}>+ Add lot</Link> : undefined} /> : (
         <Table>
           <THead><TH>Item</TH><TH>Lot #</TH><TH className="text-right">On hand</TH><TH>Expiry (FEFO)</TH><TH /></THead>
           <TBody>
