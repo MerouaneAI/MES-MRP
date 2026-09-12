@@ -7,7 +7,7 @@ vi.mock("@/lib/authz", () => ({
 }))
 
 const add = vi.fn(async () => ({}))
-vi.mock("@/lib/queue", () => ({ documentsQueue: { add: (...a: unknown[]) => add(...a) }, DOCUMENTS_QUEUE: "documents" }))
+vi.mock("@/lib/queue", () => ({ documentsQueue: { add: (...a: Parameters<typeof add>) => add(...a) }, DOCUMENTS_QUEUE: "documents" }))
 
 import { enqueuePoPdf } from "@/app/actions/documents"
 import { db } from "@/db"

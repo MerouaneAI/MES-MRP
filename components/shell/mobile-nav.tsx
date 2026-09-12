@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
 import { SidebarContent } from "./sidebar"
-import { type Role } from "@/lib/authz"
+import { type Role } from "@/lib/roles"
 
 export function MobileNav({ role, user }: { role: Role; user: { email: string; role: string } }) {
   const [open, setOpen] = useState(false)

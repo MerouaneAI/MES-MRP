@@ -90,6 +90,7 @@ export async function setUserActive(formData: FormData): Promise<void> {
   if (userId === gate.user.id && !active) throw new Error("You cannot deactivate your own account.")
   if (!active && (await isLastActiveAdmin(userId))) throw new Error("You cannot deactivate the last remaining admin.")
 
+  const [target] = await db.select({ email: users.email }).from(users).where(eq(users.id, userId))
   await db.update(users).set({ isActive: active }).where(eq(users.id, userId))
   await recordAudit(db, {
     user: gate.user, action: "user.set_active", entity: "user", entityId: userId,

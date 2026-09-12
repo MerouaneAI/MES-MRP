@@ -23,7 +23,7 @@ beforeAll(async () => {
   const hash = await bcrypt.hash("originalpass123", 10)
   const [u] = await db.insert(users).values({ name: "Acct", email, role: "viewer", passwordHash: hash }).returning()
   userId = u.id
-  vi.mocked(auth).mockResolvedValue({ user: { id: userId, email, role: "viewer" } } as any)
+  vi.mocked(auth).mockResolvedValue({ user: { id: userId, email, role: "viewer" } } as unknown as Awaited<ReturnType<typeof auth>>)
 })
 
 afterAll(async () => { await db.delete(users).where(eq(users.id, userId)) })

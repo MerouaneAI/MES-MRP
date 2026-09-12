@@ -55,7 +55,7 @@ export async function createWorkOrder(_prev: FormState, formData: FormData): Pro
 }
 
 // ---------- Release: run MRP, validate, snapshot requirements ----------
-export async function releaseWorkOrder(workOrderId: string, _prev: FormState, _formData: FormData): Promise<FormState> {
+export async function releaseWorkOrder(workOrderId: string, _prev?: FormState, _formData?: FormData): Promise<FormState> {
   const gate = await authorize("operator")
   if (!gate.ok) return gate
 
@@ -101,7 +101,7 @@ export async function releaseWorkOrder(workOrderId: string, _prev: FormState, _f
 }
 
 // ---------- Complete: the crown jewel (atomic + idempotent) ----------
-export async function completeWorkOrder(workOrderId: string, _prev: FormState, _formData: FormData): Promise<FormState> {
+export async function completeWorkOrder(workOrderId: string, _prev?: FormState, _formData?: FormData): Promise<FormState> {
   const gate = await authorize("operator")
   if (!gate.ok) return gate
 

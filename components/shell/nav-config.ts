@@ -4,7 +4,7 @@ import {
   Layers, ClipboardList, Factory, Files, Replace,
   ShieldCheck, ScrollText, CircleUser, type LucideIcon,
 } from "lucide-react"
-import type { Role } from "@/lib/authz"
+import type { Role } from "@/lib/roles"
 
 export type NavItem = { label: string; href: string; icon: LucideIcon; minRole: Role }
 export type NavSection = { heading: string; items: NavItem[] }

@@ -6,7 +6,7 @@ import { titleForPath } from "./nav-config"
 import { TopbarDate } from "./topbar-date"
 import { UserMenu } from "./user-menu"
 import { MobileNav } from "./mobile-nav"
-import { type Role } from "@/lib/authz"
+import { type Role } from "@/lib/roles"
 
 export function Topbar({ role, user }: { role: Role; user: { email: string; role: string } }) {
   const title = titleForPath(usePathname())

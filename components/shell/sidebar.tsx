@@ -4,7 +4,7 @@ import Link from "next/link"
 import { Crown } from "lucide-react"
 import { NAV } from "./nav-config"
 import { NavLink } from "./nav-link"
-import { can, type Role } from "@/lib/authz"
+import { can, type Role } from "@/lib/roles"
 
 type ShellUser = { email: string; role: string }
 

@@ -8,7 +8,7 @@ import {
 import { getDashboardData, getCharts } from "./queries"
 import { ProductionOutputChart } from "@/components/charts/production-output-chart"
 import { YieldTrendChart } from "@/components/charts/yield-trend-chart"
-import { formatCount, formatDA, formatPct, formatShortDate } from "@/lib/format"
+import { formatDA, formatShortDate } from "@/lib/format"
 import { Reveal } from "@/components/motion/reveal"
 import { CountUp } from "@/components/motion/count-up"
 

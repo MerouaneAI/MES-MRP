@@ -11,7 +11,7 @@ export default function NotFound() {
           <SearchX size={24} />
         </div>
         <h1 className="font-serif text-2xl text-ink">Not found</h1>
-        <p className="mt-2 text-sm text-ink-muted">The page you're looking for doesn't exist.</p>
+        <p className="mt-2 text-sm text-ink-muted">The page you&apos;re looking for doesn&apos;t exist.</p>
         <Link href="/" className={`${buttonClass({ variant: "secondary" })} mt-6 inline-block`}>Go home</Link>
       </Card>
     </main>

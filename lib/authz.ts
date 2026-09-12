@@ -1,16 +1,15 @@
+import "server-only"
 import { eq } from "drizzle-orm"
 import { auth } from "@/auth"
 import { db } from "@/db"
 import { users } from "@/db/schema/auth"
+import { can, type Role } from "@/lib/roles"
 
-export type Role = "admin" | "operator" | "viewer"
+export type { Role } from "@/lib/roles"
+export { can } from "@/lib/roles"
+
 export type SessionUser = { id: string; email: string; name?: string; role: Role }
 
-const RANK: Record<Role, number> = { viewer: 0, operator: 1, admin: 2 }
-
-export function can(role: Role, min: Role): boolean {
-  return RANK[role] >= RANK[min]
-}
 
 export type AuthzResult =
   | { ok: true; user: SessionUser }

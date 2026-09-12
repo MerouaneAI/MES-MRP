@@ -26,7 +26,7 @@ beforeAll(async () => {
   // Uses the admin seeded in Phase 1. authorize(..,{fresh:true}) re-reads THIS row by id.
   const [admin] = await db.select().from(users).where(eq(users.email, "admin@factory.local"))
   adminId = admin.id
-  vi.mocked(auth).mockResolvedValue({ user: { id: adminId, email: admin.email, role: "admin" } } as any)
+  vi.mocked(auth).mockResolvedValue({ user: { id: adminId, email: admin.email, role: "admin" } } as unknown as Awaited<ReturnType<typeof auth>>)
 })
 
 afterAll(async () => {
@@ -61,7 +61,7 @@ describe("createUser", () => {
     cleanupEmails.push(opEmail)
     const hash = await bcrypt.hash("supersecret123", 10)
     const [op] = await db.insert(users).values({ name: "Op2", email: opEmail, role: "operator", passwordHash: hash }).returning()
-    vi.mocked(auth).mockResolvedValueOnce({ user: { id: op.id, email: op.email, role: "operator" } } as any)
+    vi.mocked(auth).mockResolvedValueOnce({ user: { id: op.id, email: op.email, role: "operator" } } as unknown as Awaited<ReturnType<typeof auth>>)
 
     const res = await createUser(null, fd({ name: "No", email: `no-${Date.now()}@factory.local`, role: "viewer", password: "supersecret123" }))
     expect(res).toMatchObject({ ok: false })
