@@ -1,6 +1,6 @@
 // app/purchasing/page.tsx
 import Link from "next/link"
-import { desc, eq } from "drizzle-orm"
+import { desc, eq, ilike } from "drizzle-orm"
 import { ShoppingCart } from "lucide-react"
 import { db } from "@/db"
 import { purchaseOrders } from "@/db/schema/purchases"
@@ -9,16 +9,18 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
-  StatusBadge, EmptyState, buttonClass,
+  StatusBadge, EmptyState, buttonClass, SearchInput,
 } from "@/components/ui"
 import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
-export default async function PurchasingPage() {
+export default async function PurchasingPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const { q } = await searchParams
   const user = await currentUser()
   const canWrite = !!user && can(user.role, "operator")
-  const rows = await db
+  
+  const query = db
     .select({
       id: purchaseOrders.id,
       status: purchaseOrders.status,
@@ -27,14 +29,24 @@ export default async function PurchasingPage() {
     })
     .from(purchaseOrders)
     .innerJoin(parties, eq(purchaseOrders.supplierId, parties.id))
-    .orderBy(desc(purchaseOrders.createdAt))
+
+  if (q) {
+    query.where(ilike(parties.name, `%${q}%`))
+  }
+
+  const rows = await query.orderBy(desc(purchaseOrders.createdAt))
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Purchasing"
         description="Purchase orders and supplier management."
-        actions={canWrite ? <Link href="/purchasing/new" className={buttonClass()}>+ New purchase order</Link> : undefined}
+        actions={
+          <>
+            <SearchInput placeholder="Search suppliers..." />
+            {canWrite && <Link href="/purchasing/new" className={buttonClass()}>+ New purchase order</Link>}
+          </>
+        }
       />
       {rows.length === 0 ? (
         <EmptyState icon={ShoppingCart} title="No purchase orders yet" description="Create one to order materials from a supplier."

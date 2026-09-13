@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { desc } from "drizzle-orm"
+import { desc, ilike, or } from "drizzle-orm"
 import { Users } from "lucide-react"
 import { db } from "@/db"
 import { parties } from "@/db/schema/parties"
@@ -8,24 +8,35 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
-  StatusBadge, EmptyState, Button, buttonClass,
+  StatusBadge, EmptyState, Button, buttonClass, SearchInput,
 } from "@/components/ui"
 import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
-export default async function PartiesPage() {
+export default async function PartiesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const { q } = await searchParams
   const user = await currentUser()
   const canWrite = !!user && can(user.role, "operator")
   const canDelete = !!user && can(user.role, "admin")
-  const rows = await db.select().from(parties).orderBy(desc(parties.createdAt))
+  
+  const query = db.select().from(parties)
+  if (q) {
+    query.where(or(ilike(parties.name, `%${q}%`), ilike(parties.phone, `%${q}%`), ilike(parties.nif, `%${q}%`)))
+  }
+  const rows = await query.orderBy(desc(parties.createdAt))
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Parties"
         description="Customers, suppliers, and contacts."
-        actions={canWrite ? <Link href="/parties/new" className={buttonClass()}>+ Add party</Link> : undefined}
+        actions={
+          <>
+            <SearchInput placeholder="Search parties..." />
+            {canWrite && <Link href="/parties/new" className={buttonClass()}>+ Add party</Link>}
+          </>
+        }
       />
 
       {rows.length === 0 ? (

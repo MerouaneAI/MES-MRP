@@ -1,6 +1,6 @@
 // app/items/page.tsx
 import Link from "next/link"
-import { desc } from "drizzle-orm"
+import { desc, ilike, or } from "drizzle-orm"
 import { Package } from "lucide-react"
 import { db } from "@/db"
 import { items } from "@/db/schema/inventory"
@@ -9,23 +9,35 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
-  StatusBadge, EmptyState, Button, buttonClass,
+  StatusBadge, EmptyState, Button, buttonClass, SearchInput,
 } from "@/components/ui"
 import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
-export default async function ItemsPage() {
+export default async function ItemsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const { q } = await searchParams
   const user = await currentUser()
   const canWrite = !!user && can(user.role, "operator")
   const canDelete = !!user && can(user.role, "admin")
-  const rows = await db.select().from(items).orderBy(desc(items.createdAt))
+  
+  const query = db.select().from(items)
+  if (q) {
+    query.where(or(ilike(items.name, `%${q}%`), ilike(items.sku, `%${q}%`)))
+  }
+  const rows = await query.orderBy(desc(items.createdAt))
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Items"
         description="Raw materials, WIP, and finished goods."
-        actions={canWrite ? <Link href="/items/new" className={buttonClass()}>+ Add item</Link> : undefined}
+        actions={
+          <>
+            <SearchInput placeholder="Search items..." />
+            {canWrite && <Link href="/items/new" className={buttonClass()}>+ Add item</Link>}
+          </>
+        }
       />
 
       {rows.length === 0 ? (

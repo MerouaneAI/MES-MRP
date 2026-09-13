@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
-import { asc } from "drizzle-orm"
+import { asc, ilike, or } from "drizzle-orm"
 import { db } from "@/db"
 import { users } from "@/db/schema/auth"
 import { currentUser } from "@/lib/session"
@@ -8,21 +8,30 @@ import { setUserRole, setUserActive, resetUserPassword } from "@/app/actions/use
 import { CreateUserForm } from "./users-forms"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
-  Select, Input, Button,
+  Select, Input, Button, SearchInput,
 } from "@/components/ui"
 import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
-export default async function UsersPage() {
+export default async function UsersPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const { q } = await searchParams
   const me = await currentUser()
   if (!me || !can(me.role, "admin")) redirect("/forbidden")
 
-  const rows = await db.select().from(users).orderBy(asc(users.email))
+  const query = db.select().from(users)
+  if (q) {
+    query.where(or(ilike(users.email, `%${q}%`), ilike(users.name, `%${q}%`)))
+  }
+  const rows = await query.orderBy(asc(users.email))
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Users" description="Manage user accounts and roles." />
+      <PageHeader 
+        title="Users" 
+        description="Manage user accounts and roles."
+        actions={<SearchInput placeholder="Search users..." />}
+      />
       <CreateUserForm />
       <Reveal className="card p-2">
         <Table>

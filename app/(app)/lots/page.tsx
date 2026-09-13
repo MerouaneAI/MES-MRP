@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { asc, eq } from "drizzle-orm"
+import { asc, eq, ilike, or } from "drizzle-orm"
 import { Boxes } from "lucide-react"
 import { db } from "@/db"
 import { lots, items } from "@/db/schema/inventory"
@@ -8,7 +8,7 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
-  EmptyState, Button, buttonClass,
+  EmptyState, Button, buttonClass, SearchInput,
 } from "@/components/ui"
 import { Reveal } from "@/components/motion/reveal"
 
@@ -23,13 +23,14 @@ function expiryBadge(expiresAt: string | null) {
   return { label: expiresAt, className: "text-success" }
 }
 
-export default async function LotsPage() {
+export default async function LotsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const { q } = await searchParams
   const user = await currentUser()
   const canWrite = !!user && can(user.role, "operator")
   const canDelete = !!user && can(user.role, "admin")
   // FEFO: earliest expiry first. Postgres sorts NULLs LAST on ASC, so no-expiry
   // lots are consumed last — exactly what we want.
-  const rows = await db
+  const query = db
     .select({
       id: lots.id,
       lotNumber: lots.lotNumber,
@@ -41,14 +42,24 @@ export default async function LotsPage() {
     })
     .from(lots)
     .innerJoin(items, eq(lots.itemId, items.id))
-    .orderBy(asc(lots.expiresAt))
+
+  if (q) {
+    query.where(or(ilike(lots.lotNumber, `%${q}%`), ilike(items.name, `%${q}%`), ilike(items.sku, `%${q}%`)))
+  }
+
+  const rows = await query.orderBy(asc(lots.expiresAt))
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Inventory (lots)"
         description="Lot-based inventory with FEFO tracking."
-        actions={canWrite ? <Link href="/lots/new" className={buttonClass()}>+ Add lot</Link> : undefined}
+        actions={
+          <>
+            <SearchInput placeholder="Search lots..." />
+            {canWrite && <Link href="/lots/new" className={buttonClass()}>+ Add lot</Link>}
+          </>
+        }
       />
       {rows.length === 0 ? (
         <EmptyState icon={Boxes} title="No lots yet" description="Create a lot or receive a purchase order."

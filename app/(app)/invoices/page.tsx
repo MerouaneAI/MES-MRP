@@ -1,6 +1,6 @@
 // app/invoices/page.tsx
 import Link from "next/link"
-import { desc, eq } from "drizzle-orm"
+import { desc, eq, ilike, or } from "drizzle-orm"
 import { FileText } from "lucide-react"
 import { db } from "@/db"
 import { invoices } from "@/db/schema/invoices"
@@ -9,16 +9,18 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
-  EmptyState, buttonClass,
+  EmptyState, buttonClass, SearchInput,
 } from "@/components/ui"
 import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
-export default async function InvoicesPage() {
+export default async function InvoicesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const { q } = await searchParams
   const user = await currentUser()
   const canWrite = !!user && can(user.role, "operator")
-  const rows = await db
+  
+  const query = db
     .select({
       id: invoices.id,
       invoiceNo: invoices.invoiceNo,
@@ -28,14 +30,24 @@ export default async function InvoicesPage() {
     })
     .from(invoices)
     .innerJoin(parties, eq(invoices.partyId, parties.id))
-    .orderBy(desc(invoices.issuedAt))
+
+  if (q) {
+    query.where(or(ilike(invoices.invoiceNo, `%${q}%`), ilike(parties.name, `%${q}%`)))
+  }
+
+  const rows = await query.orderBy(desc(invoices.issuedAt))
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Invoices"
         description="Gapless-numbered invoices in DZD."
-        actions={canWrite ? <Link href="/invoices/new" className={buttonClass()}>+ New invoice</Link> : undefined}
+        actions={
+          <>
+            <SearchInput placeholder="Search invoices..." />
+            {canWrite && <Link href="/invoices/new" className={buttonClass()}>+ New invoice</Link>}
+          </>
+        }
       />
       {/* No edit/delete links: invoices are immutable by design. */}
       {rows.length === 0 ? (

@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { desc, eq } from "drizzle-orm"
+import { desc, eq, ilike, or } from "drizzle-orm"
 import { Factory } from "lucide-react"
 import { db } from "@/db"
 import { workOrders } from "@/db/schema/production"
@@ -8,16 +8,18 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
-  StatusBadge, EmptyState, buttonClass,
+  StatusBadge, EmptyState, buttonClass, SearchInput,
 } from "@/components/ui"
 import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
-export default async function WorkOrdersPage() {
+export default async function WorkOrdersPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const { q } = await searchParams
   const user = await currentUser()
   const canWrite = !!user && can(user.role, "operator")
-  const rows = await db
+  
+  const query = db
     .select({
       id: workOrders.id, status: workOrders.status,
       quantityPlanned: workOrders.quantityPlanned, quantityProduced: workOrders.quantityProduced,
@@ -25,14 +27,24 @@ export default async function WorkOrdersPage() {
     })
     .from(workOrders)
     .innerJoin(items, eq(workOrders.productItemId, items.id))
-    .orderBy(desc(workOrders.createdAt))
+
+  if (q) {
+    query.where(or(ilike(items.name, `%${q}%`), ilike(items.sku, `%${q}%`)))
+  }
+
+  const rows = await query.orderBy(desc(workOrders.createdAt))
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Work orders"
         description="Production scheduling and tracking."
-        actions={canWrite ? <Link href="/work-orders/new" className={buttonClass()}>+ New work order</Link> : undefined}
+        actions={
+          <>
+            <SearchInput placeholder="Search orders..." />
+            {canWrite && <Link href="/work-orders/new" className={buttonClass()}>+ New work order</Link>}
+          </>
+        }
       />
       {rows.length === 0 ? (
         <EmptyState icon={Factory} title="No work orders yet" description="Create one to start production."

@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { desc, eq } from "drizzle-orm"
+import { desc, eq, ilike, or } from "drizzle-orm"
 import { ClipboardList } from "lucide-react"
 import { db } from "@/db"
 import { boms } from "@/db/schema/production"
@@ -8,27 +8,39 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
-  StatusBadge, EmptyState, buttonClass,
+  StatusBadge, EmptyState, buttonClass, SearchInput,
 } from "@/components/ui"
 import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
-export default async function BomsPage() {
+export default async function BomsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const { q } = await searchParams
   const user = await currentUser()
   const canWrite = !!user && can(user.role, "operator")
-  const rows = await db
+  
+  const query = db
     .select({ id: boms.id, version: boms.version, status: boms.status, productName: items.name, productSku: items.sku })
     .from(boms)
     .innerJoin(items, eq(boms.productItemId, items.id))
-    .orderBy(desc(boms.createdAt))
+
+  if (q) {
+    query.where(or(ilike(items.name, `%${q}%`), ilike(items.sku, `%${q}%`)))
+  }
+
+  const rows = await query.orderBy(desc(boms.createdAt))
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Bills of materials"
         description="Product recipes and component lists."
-        actions={canWrite ? <Link href="/boms/new" className={buttonClass()}>+ New BOM</Link> : undefined}
+        actions={
+          <>
+            <SearchInput placeholder="Search BOMs..." />
+            {canWrite && <Link href="/boms/new" className={buttonClass()}>+ New BOM</Link>}
+          </>
+        }
       />
       {rows.length === 0 ? (
         <EmptyState icon={ClipboardList} title="No BOMs yet" description="Create a bill of materials for a product."

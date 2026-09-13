@@ -1,4 +1,4 @@
-import { asc, desc } from "drizzle-orm"
+import { asc, desc, ilike } from "drizzle-orm"
 import { FileDown } from "lucide-react"
 import { db } from "@/db"
 import { documents } from "@/db/schema/documents"
@@ -9,22 +9,33 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
-  Badge, StatusBadge, EmptyState, Field, Select, Button, buttonClass,
+  Badge, StatusBadge, EmptyState, Field, Select, Button, buttonClass, SearchInput,
 } from "@/components/ui"
 import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
-export default async function DocumentsPage() {
+export default async function DocumentsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const { q } = await searchParams
   const user = await currentUser()
   const canWrite = !!user && can(user.role, "operator")
-  const docs = await db.select().from(documents).orderBy(desc(documents.createdAt))
+  
+  const query = db.select().from(documents)
+  if (q) {
+    query.where(ilike(documents.refId, `%${q}%`))
+  }
+  const docs = await query.orderBy(desc(documents.createdAt))
+  
   const poOptions = await db.select({ id: purchaseOrders.id }).from(purchaseOrders).orderBy(desc(purchaseOrders.createdAt))
   const lotOptions = await db.select({ id: lots.id, lotNumber: lots.lotNumber }).from(lots).orderBy(asc(lots.lotNumber))
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Documents" description="Generated PDFs for purchase orders and certificates." />
+      <PageHeader 
+        title="Documents" 
+        description="Generated PDFs for purchase orders and certificates." 
+        actions={<SearchInput placeholder="Search references..." />}
+      />
 
       {canWrite && (
         <div className="flex flex-wrap gap-6">

@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { desc, eq } from "drizzle-orm"
+import { desc, eq, ilike, or } from "drizzle-orm"
 import { GitBranch } from "lucide-react"
 import { db } from "@/db"
 import { engineeringChangeOrders, boms } from "@/db/schema/production"
@@ -9,16 +9,18 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
-  StatusBadge, EmptyState, Button, buttonClass,
+  StatusBadge, EmptyState, Button, buttonClass, SearchInput,
 } from "@/components/ui"
 import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
-export default async function EcoPage() {
+export default async function EcoPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const { q } = await searchParams
   const user = await currentUser()
   const isAdmin = !!user && can(user.role, "admin")
-  const rows = await db
+  
+  const query = db
     .select({
       id: engineeringChangeOrders.id,
       reason: engineeringChangeOrders.reason,
@@ -29,14 +31,24 @@ export default async function EcoPage() {
     .from(engineeringChangeOrders)
     .innerJoin(items, eq(engineeringChangeOrders.productItemId, items.id))
     .innerJoin(boms, eq(engineeringChangeOrders.toBomId, boms.id))
-    .orderBy(desc(engineeringChangeOrders.createdAt))
+
+  if (q) {
+    query.where(or(ilike(items.name, `%${q}%`), ilike(engineeringChangeOrders.reason, `%${q}%`)))
+  }
+
+  const rows = await query.orderBy(desc(engineeringChangeOrders.createdAt))
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Engineering change orders"
         description="Manage recipe version changes."
-        actions={isAdmin ? <Link href="/eco/new" className={buttonClass()}>+ New ECO</Link> : undefined}
+        actions={
+          <>
+            <SearchInput placeholder="Search ECOs..." />
+            {isAdmin && <Link href="/eco/new" className={buttonClass()}>+ New ECO</Link>}
+          </>
+        }
       />
       {rows.length === 0 ? (
         <EmptyState icon={GitBranch} title="No ECOs yet" description="Create one to manage recipe changes."
