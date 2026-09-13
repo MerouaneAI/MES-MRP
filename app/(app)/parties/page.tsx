@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { desc, ilike, or } from "drizzle-orm"
+import { desc, ilike, or, eq } from "drizzle-orm"
 import { Users } from "lucide-react"
 import { db } from "@/db"
 import { parties } from "@/db/schema/parties"
@@ -8,14 +8,14 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
-  StatusBadge, EmptyState, Button, buttonClass, SearchInput,
+  StatusBadge, EmptyState, Button, buttonClass, SearchInput, SelectFilter,
 } from "@/components/ui"
 import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
-export default async function PartiesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const { q } = await searchParams
+export default async function PartiesPage({ searchParams }: { searchParams: Promise<{ q?: string, type?: "customer" | "supplier" | "both" }> }) {
+  const { q, type } = await searchParams
   const user = await currentUser()
   const canWrite = !!user && can(user.role, "operator")
   const canDelete = !!user && can(user.role, "admin")
@@ -23,6 +23,9 @@ export default async function PartiesPage({ searchParams }: { searchParams: Prom
   const query = db.select().from(parties)
   if (q) {
     query.where(or(ilike(parties.name, `%${q}%`), ilike(parties.phone, `%${q}%`), ilike(parties.nif, `%${q}%`)))
+  }
+  if (type) {
+    query.where(eq(parties.type, type))
   }
   const rows = await query.orderBy(desc(parties.createdAt))
 
@@ -33,6 +36,15 @@ export default async function PartiesPage({ searchParams }: { searchParams: Prom
         description="Customers, suppliers, and contacts."
         actions={
           <>
+            <SelectFilter
+              paramName="type"
+              placeholder="All types"
+              options={[
+                { label: "Customer", value: "customer" },
+                { label: "Supplier", value: "supplier" },
+                { label: "Both", value: "both" },
+              ]}
+            />
             <SearchInput placeholder="Search parties..." />
             {canWrite && <Link href="/parties/new" className={buttonClass()}>+ Add party</Link>}
           </>
