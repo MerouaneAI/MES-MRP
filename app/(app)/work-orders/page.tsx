@@ -52,10 +52,11 @@ export default async function WorkOrdersPage({ searchParams }: { searchParams: P
       ) : (
         <Reveal className="card p-2">
           <Table>
-            <THead><TH>Product</TH><TH>Status</TH><TH className="text-right">Planned</TH><TH className="text-right">Produced</TH><TH /></THead>
+            <THead><TH>Code</TH><TH>Product</TH><TH>Status</TH><TH className="text-right">Planned</TH><TH className="text-right">Produced</TH><TH /></THead>
             <TBody>
               {rows.map((w) => (
                 <TR key={w.id}>
+                  <TD className="font-mono text-sm">WO-{w.id.slice(0, 8).toUpperCase()}</TD>
                   <TD className="font-medium">{w.productName} <span className="text-ink-muted font-normal">({w.productSku})</span></TD>
                   <TD><StatusBadge status={w.status} /></TD>
                   <TD align="right">{w.quantityPlanned}</TD>

@@ -43,7 +43,7 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
             <Field label="PO PDF">
               <Select name="poId" required defaultValue="">
                 <option value="" disabled>Choose PO…</option>
-                {poOptions.map((p) => <option key={p.id} value={p.id}>{p.id.slice(0, 8)}</option>)}
+                {poOptions.map((p) => <option key={p.id} value={p.id}>PO-{p.id.slice(0, 8).toUpperCase()}</option>)}
               </Select>
             </Field>
             <Button type="submit" size="sm">Generate PO PDF</Button>
@@ -71,7 +71,13 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
               {docs.map((d) => (
                 <TR key={d.id}>
                   <TD><Badge>{d.kind}</Badge></TD>
-                  <TD className="font-medium">{d.refId.slice(0, 8)}</TD>
+                  <TD className="font-medium font-mono text-sm">
+                    {d.kind === "po_pdf" 
+                      ? `PO-${d.refId.slice(0, 8).toUpperCase()}` 
+                      : d.kind === "coa_pdf" 
+                        ? (lotOptions.find(l => l.id === d.refId)?.lotNumber ?? d.refId.slice(0, 8).toUpperCase())
+                        : d.refId.slice(0, 8).toUpperCase()}
+                  </TD>
                   <TD><StatusBadge status={d.status} />{d.error ? ` — ${d.error}` : ""}</TD>
                   <TD>{d.status === "done" ? <a href={`/api/documents/${d.id}`} className={buttonClass({ variant: "ghost", size: "sm" })}>Download</a> : "—"}</TD>
                 </TR>

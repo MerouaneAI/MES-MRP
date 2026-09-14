@@ -31,7 +31,7 @@ export default async function PurchaseOrderPage({ params }: { params: Promise<{ 
     <div className="space-y-6">
       <Link href="/purchasing" className={buttonClass({ variant: "ghost", size: "sm" })}>← Back to purchasing</Link>
       <PageHeader
-        title="Purchase order"
+        title={`Purchase order PO-${id.slice(0, 8).toUpperCase()}`}
         description={`Supplier: ${supplier?.name ?? "—"} · Total: ${po.totalAmount} DZD`}
         actions={<StatusBadge status={po.status} />}
       />

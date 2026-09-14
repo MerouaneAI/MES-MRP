@@ -55,10 +55,11 @@ export default async function PurchasingPage({ searchParams }: { searchParams: P
       ) : (
         <Reveal className="card p-2">
           <Table>
-            <THead><TH>Supplier</TH><TH>Status</TH><TH>Receive Date</TH><TH className="text-right">Total (DZD)</TH><TH /></THead>
+            <THead><TH>Code</TH><TH>Supplier</TH><TH>Status</TH><TH>Receive Date</TH><TH className="text-right">Total (DZD)</TH><TH /></THead>
             <TBody>
               {rows.map((r) => (
                 <TR key={r.id}>
+                  <TD className="font-mono text-sm">PO-{r.id.slice(0, 8).toUpperCase()}</TD>
                   <TD className="font-medium">{r.supplierName}</TD>
                   <TD><StatusBadge status={r.status} /></TD>
                   <TD className="text-ink-muted">{r.receivedAt ? new Date(r.receivedAt).toISOString().slice(0, 10) : "—"}</TD>

@@ -42,7 +42,7 @@ export default async function WorkOrderDetailPage({ params }: { params: Promise<
     <div className="space-y-6">
       <Link href="/work-orders" className={buttonClass({ variant: "ghost", size: "sm" })}>← Back to work orders</Link>
       <PageHeader
-        title={`Work order — ${product?.name}`}
+        title={`Work order WO-${id.slice(0, 8).toUpperCase()} — ${product?.name}`}
         description={`BOM v${bom?.version} · planned ${wo.quantityPlanned} · produced ${wo.quantityProduced}`}
         actions={<StatusBadge status={wo.status} />}
       />
