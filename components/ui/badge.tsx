@@ -36,6 +36,8 @@ const STATUS_TONE: Record<string, Tone> = {
   active: "green", archived: "gray", applied: "green",
   // inventory movement types
   receipt: "green", issue: "red",
+  // invoices
+  issued: "blue", delivered: "green", returned: "red",
 }
 export function statusTone(status: string): Tone {
   return STATUS_TONE[(status ?? "").toLowerCase()] ?? "gray"
