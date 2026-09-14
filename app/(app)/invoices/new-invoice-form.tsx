@@ -19,11 +19,8 @@ export function NewInvoiceForm({ customers }: { customers: { id: string; name: s
           </Select>
         </Field>
 
-        <Field label="Total amount (DZD)" required>
-          <Input name="totalAmount" placeholder="0.00" required />
-        </Field>
 
-        <Button type="submit" disabled={pending}>{pending ? "Issuing…" : "Issue invoice"}</Button>
+        <Button type="submit" disabled={pending}>{pending ? "Creating…" : "Create invoice"}</Button>
       </form>
     </Card>
   )

@@ -86,7 +86,7 @@ export async function bulkUpdateLots(_prev: FormState, formData: FormData): Prom
   const lotIds = formData.getAll("lot_id").map(String)
   if (lotIds.length === 0) return { ok: false, error: "No lots to update." }
 
-  const updates = []
+  const updates: { id: string, data: any }[] = []
   for (const id of lotIds) {
     const parsed = lotSchema.safeParse({
       itemId: formData.get(`lot_itemId_${id}`),

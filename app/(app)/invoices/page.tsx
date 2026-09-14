@@ -9,14 +9,14 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
-  EmptyState, buttonClass, SearchInput,
+  EmptyState, buttonClass, SearchInput, StatusBadge, SelectFilter
 } from "@/components/ui"
 import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
-export default async function InvoicesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const { q } = await searchParams
+export default async function InvoicesPage({ searchParams }: { searchParams: Promise<{ q?: string, status?: string }> }) {
+  const { q, status } = await searchParams
   const user = await currentUser()
   const canWrite = !!user && can(user.role, "operator")
   
@@ -25,6 +25,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
       id: invoices.id,
       invoiceNo: invoices.invoiceNo,
       totalAmount: invoices.totalAmount,
+      status: invoices.status,
       issuedAt: invoices.issuedAt,
       partyName: parties.name,
     })
@@ -33,6 +34,9 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
 
   if (q) {
     query.where(or(ilike(invoices.invoiceNo, `%${q}%`), ilike(parties.name, `%${q}%`)))
+  }
+  if (status) {
+    query.where(eq(invoices.status, status as any))
   }
 
   const rows = await query.orderBy(desc(invoices.issuedAt))
@@ -44,6 +48,16 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
         description="Gapless-numbered invoices in DZD."
         actions={
           <>
+            <SelectFilter 
+              paramName="status" 
+              placeholder="All statuses"
+              options={[
+                { label: "Draft", value: "draft" },
+                { label: "Issued", value: "issued" },
+                { label: "Delivered", value: "delivered" },
+                { label: "Returned", value: "returned" },
+              ]} 
+            />
             <SearchInput placeholder="Search invoices..." />
             {canWrite && <Link href="/invoices/new" className={buttonClass()}>+ New invoice</Link>}
           </>
@@ -56,14 +70,16 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
       ) : (
         <Reveal className="card p-2">
           <Table>
-            <THead><TH>Invoice #</TH><TH>Customer</TH><TH className="text-right">Total (DZD)</TH><TH>Issued</TH></THead>
+            <THead><TH>Invoice #</TH><TH>Customer</TH><TH>Status</TH><TH className="text-right">Total (DZD)</TH><TH>Date</TH><TH /></THead>
             <TBody>
               {rows.map((r) => (
                 <TR key={r.id}>
                   <TD className="font-medium">{r.invoiceNo}</TD>
                   <TD>{r.partyName}</TD>
+                  <TD><StatusBadge status={r.status} /></TD>
                   <TD align="right">{r.totalAmount}</TD>
                   <TD className="text-ink-muted">{new Date(r.issuedAt).toISOString().slice(0, 10)}</TD>
+                  <TD><Link href={`/invoices/${r.id}`} className={buttonClass({ variant: "ghost", size: "sm" })}>Open</Link></TD>
                 </TR>
               ))}
             </TBody>

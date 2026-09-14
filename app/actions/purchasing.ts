@@ -134,7 +134,7 @@ export async function receivePurchaseOrder(formData: FormData): Promise<void> {
   const poId = String(formData.get("poId") ?? "")
   if (!poId) return
 
-  let createdLotIds: string[] = []
+  const createdLotIds: string[] = []
 
   await db.transaction(async (tx) => {
     // Idempotency: flip ordered -> received exactly once. If no row comes back it
