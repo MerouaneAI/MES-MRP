@@ -134,6 +134,8 @@ export async function receivePurchaseOrder(formData: FormData): Promise<void> {
   const poId = String(formData.get("poId") ?? "")
   if (!poId) return
 
+  let createdLotIds: string[] = []
+
   await db.transaction(async (tx) => {
     // Idempotency: flip ordered -> received exactly once. If no row comes back it
     // was already received (or not orderable) -> do nothing, never double-stock.
@@ -152,14 +154,16 @@ export async function receivePurchaseOrder(formData: FormData): Promise<void> {
         : null
       const lotNumber = `${item?.sku ?? "LOT"}-${po.id.slice(0, 8)}-${line.id.slice(0, 4)}`
 
-      await tx.insert(lots).values({
+      const [newLot] = await tx.insert(lots).values({
         itemId: line.itemId,
         lotNumber,
         quantityOnHand: line.quantity,   // numeric string, already 3 dp
         producedAt,
         expiresAt,
         sourcePoId: po.id,
-      })
+      }).returning({ id: lots.id })
+      
+      createdLotIds.push(newLot.id)
     }
 
     await recordAudit(tx, {
@@ -171,4 +175,8 @@ export async function receivePurchaseOrder(formData: FormData): Promise<void> {
   revalidatePath("/purchasing")
   revalidatePath(`/purchasing/${poId}`)
   revalidatePath("/lots")               // inventory changed too
+  
+  if (createdLotIds.length > 0) {
+    redirect(`/lots/bulk-edit?ids=${createdLotIds.join(",")}`)
+  }
 }

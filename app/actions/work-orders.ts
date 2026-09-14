@@ -105,6 +105,8 @@ export async function completeWorkOrder(workOrderId: string, _prev?: FormState, 
   const gate = await authorize("operator")
   if (!gate.ok) return gate
 
+  let newLotId: string | undefined
+
   try {
     await db.transaction(async (tx) => {
       // Idempotent + atomic: flip released -> completed exactly once. If no row
@@ -129,6 +131,8 @@ export async function completeWorkOrder(workOrderId: string, _prev?: FormState, 
         producedAt,
         expiresAt,
       }).returning()
+      
+      newLotId = outputLot.id
 
       // 2) Explode + consume input lots FEFO, writing genealogy per consumed lot.
       const requirements = await explodeBom(tx, wo.bomId, wo.quantityPlanned)
@@ -166,6 +170,11 @@ export async function completeWorkOrder(workOrderId: string, _prev?: FormState, 
   revalidatePath(`/work-orders/${workOrderId}`)
   revalidatePath("/lots")
   revalidatePath("/shopfloor")
+  
+  if (newLotId) {
+    redirect(`/lots/${newLotId}/edit`)
+  }
+  
   return { ok: true }
 }
 

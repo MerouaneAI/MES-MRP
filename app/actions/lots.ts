@@ -78,3 +78,36 @@ export async function deleteLot(formData: FormData): Promise<void> {
   }
   revalidatePath("/lots")
 }
+
+export async function bulkUpdateLots(_prev: FormState, formData: FormData): Promise<FormState> {
+  const gate = await authorize("operator")
+  if (!gate.ok) return gate
+
+  const lotIds = formData.getAll("lot_id").map(String)
+  if (lotIds.length === 0) return { ok: false, error: "No lots to update." }
+
+  const updates = []
+  for (const id of lotIds) {
+    const parsed = lotSchema.safeParse({
+      itemId: formData.get(`lot_itemId_${id}`),
+      lotNumber: formData.get(`lot_lotNumber_${id}`) ?? "",
+      quantityOnHand: formData.get(`lot_quantityOnHand_${id}`) ?? "",
+      producedAt: formData.get(`lot_producedAt_${id}`) ?? "",
+      expiresAt: formData.get(`lot_expiresAt_${id}`) ?? "",
+    })
+
+    if (!parsed.success) {
+      return { ok: false, error: "Please fix the errors below.", fieldErrors: parsed.error.flatten().fieldErrors }
+    }
+    updates.push({ id, data: toColumns(parsed.data) })
+  }
+
+  await db.transaction(async (tx) => {
+    for (const update of updates) {
+      await tx.update(lots).set(update.data).where(eq(lots.id, update.id))
+    }
+  })
+
+  revalidatePath("/lots")
+  redirect("/lots")
+}
