@@ -122,3 +122,30 @@ export async function activateBom(formData: FormData): Promise<void> {
   revalidatePath("/boms")
   revalidatePath(`/boms/${bomId}`)
 }
+
+// Reactivate an ARCHIVED BOM. This archives the currently active one (if any) and activates the chosen one.
+export async function reactivateBom(formData: FormData): Promise<void> {
+  const gate = await authorize("admin", { fresh: true })
+  if (!gate.ok) throw new Error(gate.error)
+
+  const bomId = String(formData.get("bomId") ?? "")
+  if (!bomId) return
+
+  await db.transaction(async (tx) => {
+    const [bom] = await tx.select().from(boms).where(eq(boms.id, bomId))
+    if (!bom || bom.status !== "archived") return
+
+    // Archive the currently active BOM for this product, if any
+    await tx.update(boms)
+      .set({ status: "archived" })
+      .where(and(eq(boms.productItemId, bom.productItemId), eq(boms.status, "active")))
+
+    // Activate this BOM
+    await tx.update(boms)
+      .set({ status: "active" })
+      .where(eq(boms.id, bomId))
+  })
+
+  revalidatePath("/boms")
+  revalidatePath(`/boms/${bomId}`)
+}

@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { reactivateBom } from "@/app/actions/boms"
 import { desc, eq, ilike, or } from "drizzle-orm"
 import { ClipboardList } from "lucide-react"
 import { db } from "@/db"
@@ -8,7 +9,7 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
-  StatusBadge, EmptyState, buttonClass, SearchInput,
+  StatusBadge, EmptyState, buttonClass, SearchInput, Button,
 } from "@/components/ui"
 import { Reveal } from "@/components/motion/reveal"
 
@@ -18,6 +19,7 @@ export default async function BomsPage({ searchParams }: { searchParams: Promise
   const { q } = await searchParams
   const user = await currentUser()
   const canWrite = !!user && can(user.role, "operator")
+  const isAdmin = !!user && can(user.role, "admin")
   
   const query = db
     .select({ id: boms.id, version: boms.version, status: boms.status, productName: items.name, productSku: items.sku })
@@ -55,7 +57,17 @@ export default async function BomsPage({ searchParams }: { searchParams: Promise
                   <TD className="font-medium">{b.productName} <span className="text-ink-muted font-normal">({b.productSku})</span></TD>
                   <TD align="right">v{b.version}</TD>
                   <TD><StatusBadge status={b.status} /></TD>
-                  <TD><Link href={`/boms/${b.id}`} className={buttonClass({ variant: "ghost", size: "sm" })}>Open</Link></TD>
+                  <TD>
+                    <div className="flex justify-end gap-2 items-center">
+                      {b.status === "archived" && isAdmin && (
+                        <form action={reactivateBom}>
+                          <input type="hidden" name="bomId" value={b.id} />
+                          <Button type="submit" variant="secondary" size="sm">Reactivate</Button>
+                        </form>
+                      )}
+                      <Link href={`/boms/${b.id}`} className={buttonClass({ variant: "ghost", size: "sm" })}>Open</Link>
+                    </div>
+                  </TD>
                 </TR>
               ))}
             </TBody>

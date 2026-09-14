@@ -23,7 +23,7 @@ export default async function PurchaseOrderPage({ params }: { params: Promise<{ 
 
   const [supplier] = await db.select().from(parties).where(eq(parties.id, po.supplierId))
   const lines = await db.select().from(purchaseOrderLines).where(eq(purchaseOrderLines.poId, id))
-  const itemOptions = await db.select({ id: items.id, name: items.name, sku: items.sku }).from(items).orderBy(asc(items.name))
+  const itemOptions = await db.select({ id: items.id, name: items.name, sku: items.sku }).from(items).where(eq(items.kind, "raw_material")).orderBy(asc(items.name))
 
   const editable = po.status !== "received"
 
