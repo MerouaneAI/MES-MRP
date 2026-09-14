@@ -5,7 +5,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 const TOOLTIP = { background: "#1B1B1F", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "#F4F2EC" }
 
 export function ProductionOutputChart({ data }: {
-  data: { day: string; planned: number; actual: number }[]
+  data: { day: string; total: number; delivered: number }[]
 }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
@@ -14,8 +14,8 @@ export function ProductionOutputChart({ data }: {
         <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fill: "#9A968C", fontSize: 12 }} />
         <YAxis tickLine={false} axisLine={false} width={40} tick={{ fill: "#6E6A62", fontSize: 12 }} />
         <Tooltip cursor={{ fill: "rgba(255,255,255,0.04)" }} contentStyle={TOOLTIP} labelStyle={{ color: "#9A968C" }} />
-        <Bar dataKey="planned" name="Planned" fill="#3A3A40" radius={[4, 4, 0, 0]} maxBarSize={26} />
-        <Bar dataKey="actual" name="Actual" fill="#C9A961" radius={[4, 4, 0, 0]} maxBarSize={26} />
+        <Bar dataKey="total" name="Total Orders" fill="#3A3A40" radius={[4, 4, 0, 0]} maxBarSize={26} />
+        <Bar dataKey="delivered" name="Delivered" fill="#C9A961" radius={[4, 4, 0, 0]} maxBarSize={26} />
       </BarChart>
     </ResponsiveContainer>
   )

@@ -3,6 +3,8 @@ import { and, count, desc, eq, gte, inArray, sql } from "drizzle-orm"
 import { db } from "@/db"
 import { workOrders } from "@/db/schema/production"
 import { items, lots } from "@/db/schema/inventory"
+import { invoices } from "@/db/schema/invoices"
+import { parties } from "@/db/schema/parties"
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 const dayIndex = (d: Date) => (d.getDay() + 6) % 7   // Mon=0 … Sun=6
@@ -16,15 +18,12 @@ export async function getDashboardData() {
   const [newWoWeek] = await db.select({ n: count() }).from(workOrders)
     .where(gte(workOrders.createdAt, weekAgo))
 
-  const [onHand] = await db.select({
-    total: sql<string>`coalesce(sum(${lots.quantityOnHand}), 0)`,
-  }).from(lots)
+  const [numParties] = await db.select({
+    total: count(),
+  }).from(parties)
 
-  const [lateWo] = await db.select({ n: count() }).from(workOrders)
-    .where(and(
-      inArray(workOrders.status, ["planned", "released"]),
-      sql`${workOrders.scheduledFor} < current_date`,
-    ))
+  const [returnedInvoices] = await db.select({ n: count() }).from(invoices)
+    .where(eq(invoices.status, "returned"))
 
   const [y] = await db.select({
     planned: sql<string>`coalesce(sum(${workOrders.quantityPlanned}), 0)`,
@@ -48,14 +47,30 @@ export async function getDashboardData() {
     .innerJoin(items, eq(lots.itemId, items.id))
     .orderBy(desc(lots.createdAt)).limit(6)
 
-  return { openWo, newWoWeek, onHand, lateWo, yieldPct, activeWorkOrders, recentInventory }
+  return { openWo, newWoWeek, numParties, returnedInvoices, yieldPct, activeWorkOrders, recentInventory }
 }
 
-// Bucket the last 7 days of COMPLETED work orders into planned/actual per weekday.
+// Bucket the last 7 days of invoices into total vs delivered.
 export async function getCharts() {
   const since = new Date(Date.now() - 6 * 86400000)
   since.setHours(0, 0, 0, 0)
 
+  const recentInvoices = await db.select({
+    issuedAt: invoices.issuedAt,
+    status: invoices.status,
+  }).from(invoices)
+    .where(gte(invoices.issuedAt, since))
+
+  const output = DAYS.map((day) => ({ day, total: 0, delivered: 0 }))
+  for (const r of recentInvoices) {
+    if (!r.issuedAt) continue
+    const i = dayIndex(new Date(r.issuedAt))
+    output[i].total += 1
+    if (r.status === "delivered") {
+      output[i].delivered += 1
+    }
+  }
+  
   const completed = await db.select({
     completedAt: workOrders.completedAt,
     produced: workOrders.quantityProduced,
@@ -63,14 +78,15 @@ export async function getCharts() {
   }).from(workOrders)
     .where(and(eq(workOrders.status, "completed"), gte(workOrders.completedAt, since)))
 
-  const output = DAYS.map((day) => ({ day, planned: 0, actual: 0 }))
+  const yieldData = DAYS.map((day) => ({ day, planned: 0, actual: 0 }))
   for (const r of completed) {
     if (!r.completedAt) continue
     const i = dayIndex(new Date(r.completedAt))
-    output[i].planned += Number(r.planned)
-    output[i].actual += Number(r.produced)
+    yieldData[i].planned += Number(r.planned)
+    yieldData[i].actual += Number(r.produced)
   }
-  const yieldSeries = output.map((o) => ({
+
+  const yieldSeries = yieldData.map((o) => ({
     day: o.day,
     yield: o.planned > 0 ? Math.round((o.actual / o.planned) * 1000) / 10 : 0,
   }))

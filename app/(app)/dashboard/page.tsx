@@ -24,18 +24,18 @@ export default async function DashboardPage() {
                 <StatCard label="Open Work Orders" icon={ClipboardList}
                     value={<CountUp value={Number(d.openWo.n)} />}
                     delta={`+${d.newWoWeek.n}`} deltaTone="up" note="new this week" />
-                <StatCard label="Inventory on Hand" value={formatDA(d.onHand.total)} icon={Boxes}
-                    note="total units in stock" />
+                <StatCard label="Total Parties" value={String(d.numParties.total)} icon={Boxes}
+                    note="customers and suppliers" />
                 <StatCard label="Production Yield" icon={Gauge}
                     value={<CountUp value={d.yieldPct} decimals={1} suffix="%" />}
                     note="completed work orders" />
-                <StatCard label="Late Orders" icon={AlertTriangle}
-                    value={<CountUp value={Number(d.lateWo.n)} />}
-                    delta={d.lateWo.n > 0 ? String(d.lateWo.n) : undefined} deltaTone="down" note="past due date" />
+                <StatCard label="Returned Sales" icon={AlertTriangle}
+                    value={<CountUp value={Number(d.returnedInvoices.n)} />}
+                    delta={d.returnedInvoices.n > 0 ? String(d.returnedInvoices.n) : undefined} deltaTone="down" note="cancelled invoices" />
             </Reveal>
 
             <div className="grid gap-4 lg:grid-cols-2">
-                <Panel title="Production Output" subtitle="Planned vs actual units this week" action={<LivePill />}>
+                <Panel title="Sales Volume" subtitle="Total orders vs delivered this week" action={<LivePill />}>
                     <ProductionOutputChart data={charts.output} />
                 </Panel>
                 <Panel title="Yield Trend" subtitle="Quality performance over 7 days">
