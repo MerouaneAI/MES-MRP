@@ -8,7 +8,7 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
-  EmptyState, Button, buttonClass, SearchInput,
+  EmptyState, Button, buttonClass, SearchInput, SelectFilter,
 } from "@/components/ui"
 import { Reveal } from "@/components/motion/reveal"
 
@@ -23,8 +23,8 @@ function expiryBadge(expiresAt: string | null) {
   return { label: expiresAt, className: "text-success" }
 }
 
-export default async function LotsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const { q } = await searchParams
+export default async function LotsPage({ searchParams }: { searchParams: Promise<{ q?: string, kind?: "raw_material" | "finished_good" }> }) {
+  const { q, kind } = await searchParams
   const user = await currentUser()
   const canWrite = !!user && can(user.role, "operator")
   const canDelete = !!user && can(user.role, "admin")
@@ -39,12 +39,16 @@ export default async function LotsPage({ searchParams }: { searchParams: Promise
       itemName: items.name,
       itemSku: items.sku,
       unit: items.unit,
+      kind: items.kind,
     })
     .from(lots)
     .innerJoin(items, eq(lots.itemId, items.id))
 
   if (q) {
     query.where(or(ilike(lots.lotNumber, `%${q}%`), ilike(items.name, `%${q}%`), ilike(items.sku, `%${q}%`)))
+  }
+  if (kind) {
+    query.where(eq(items.kind, kind))
   }
 
   const rows = await query.orderBy(asc(lots.expiresAt))
@@ -56,6 +60,14 @@ export default async function LotsPage({ searchParams }: { searchParams: Promise
         description="Lot-based inventory with FEFO tracking."
         actions={
           <>
+            <SelectFilter
+              paramName="kind"
+              placeholder="All kinds"
+              options={[
+                { label: "Raw Material", value: "raw_material" },
+                { label: "Finished Good", value: "finished_good" },
+              ]}
+            />
             <SearchInput placeholder="Search lots..." />
             {canWrite && <Link href="/lots/new" className={buttonClass()}>+ Add lot</Link>}
           </>

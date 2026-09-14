@@ -11,7 +11,7 @@ import { FACILITY_ID } from "@/lib/constants"
 import type { FormState } from "@/lib/types"
 
 const itemSchema = z.object({
-  kind: z.enum(["raw_material", "finished_good", "wip"]),
+  kind: z.enum(["raw_material", "finished_good"]),
   sku: z.string().trim().min(1, "SKU is required").max(60),
   name: z.string().trim().min(1, "Name is required").max(200),
   unit: z.string().trim().min(1, "Unit is required").max(20),

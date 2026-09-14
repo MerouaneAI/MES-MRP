@@ -1,6 +1,6 @@
 // app/items/page.tsx
 import Link from "next/link"
-import { desc, ilike, or } from "drizzle-orm"
+import { desc, ilike, or, eq } from "drizzle-orm"
 import { Package } from "lucide-react"
 import { db } from "@/db"
 import { items } from "@/db/schema/inventory"
@@ -9,14 +9,14 @@ import { currentUser } from "@/lib/session"
 import { can } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
-  StatusBadge, EmptyState, Button, buttonClass, SearchInput,
+  StatusBadge, EmptyState, Button, buttonClass, SearchInput, SelectFilter,
 } from "@/components/ui"
 import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
-export default async function ItemsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const { q } = await searchParams
+export default async function ItemsPage({ searchParams }: { searchParams: Promise<{ q?: string, kind?: "raw_material" | "finished_good" }> }) {
+  const { q, kind } = await searchParams
   const user = await currentUser()
   const canWrite = !!user && can(user.role, "operator")
   const canDelete = !!user && can(user.role, "admin")
@@ -25,15 +25,26 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
   if (q) {
     query.where(or(ilike(items.name, `%${q}%`), ilike(items.sku, `%${q}%`)))
   }
+  if (kind) {
+    query.where(eq(items.kind, kind))
+  }
   const rows = await query.orderBy(desc(items.createdAt))
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Items"
-        description="Raw materials, WIP, and finished goods."
+        description="Raw materials and finished goods."
         actions={
           <>
+            <SelectFilter
+              paramName="kind"
+              placeholder="All kinds"
+              options={[
+                { label: "Raw Material", value: "raw_material" },
+                { label: "Finished Good", value: "finished_good" },
+              ]}
+            />
             <SearchInput placeholder="Search items..." />
             {canWrite && <Link href="/items/new" className={buttonClass()}>+ Add item</Link>}
           </>

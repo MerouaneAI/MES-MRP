@@ -2,7 +2,7 @@ import {
   pgTable, uuid, text, numeric, timestamp, date, pgEnum, index, integer, uniqueIndex,
 } from "drizzle-orm/pg-core"
 
-export const itemKindEnum = pgEnum("item_kind", ["raw_material", "finished_good", "wip"])
+export const itemKindEnum = pgEnum("item_kind", ["raw_material", "finished_good"])
 
 // Catalog: NO quantity here
 export const items = pgTable("items", {

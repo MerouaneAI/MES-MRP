@@ -26,7 +26,6 @@ async function main() {
     { facilityId: F, kind: "finished_good" as const, sku: "FG-CAKE-CH", name: "Chocolate Cake 1kg", unit: "unit", shelfLifeDays: 14 },
     { facilityId: F, kind: "finished_good" as const, sku: "FG-BREAD-WH", name: "White Bread Loaf", unit: "unit", shelfLifeDays: 5 },
     { facilityId: F, kind: "finished_good" as const, sku: "FG-COOKIE-VAN", name: "Vanilla Cookies 250g", unit: "unit", shelfLifeDays: 60 },
-    { facilityId: F, kind: "wip" as const, sku: "WIP-DOUGH", name: "Base Dough Mix", unit: "kg", shelfLifeDays: 2 },
   ]
   const inserted = await db.insert(items).values(extraItems).onConflictDoNothing().returning()
   console.log(`  ✓ ${inserted.length} extra items inserted`)
@@ -46,7 +45,6 @@ async function main() {
     { itemId: bySku["FG-CAKE-CH"].id, lotNumber: "CAKE-2026-001", quantityOnHand: "45.000", producedAt: dateStr(daysAgo(2)), expiresAt: dateStr(daysAgo(-12)) },
     { itemId: bySku["FG-BREAD-WH"].id, lotNumber: "BREAD-2026-001", quantityOnHand: "120.000", producedAt: dateStr(daysAgo(1)), expiresAt: dateStr(daysAgo(-4)) },
     { itemId: bySku["FG-COOKIE-VAN"].id, lotNumber: "COOK-2026-001", quantityOnHand: "200.000", producedAt: dateStr(daysAgo(4)), expiresAt: dateStr(daysAgo(-56)) },
-    { itemId: bySku["WIP-DOUGH"].id, lotNumber: "DOUGH-2026-001", quantityOnHand: "75.000", producedAt: dateStr(daysAgo(0)), expiresAt: dateStr(daysAgo(-2)) },
   ]
   const lotsInserted = await db.insert(lots).values(lotData).onConflictDoNothing().returning()
   console.log(`  ✓ ${lotsInserted.length} extra lots inserted`)

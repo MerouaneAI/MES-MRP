@@ -28,7 +28,6 @@ export function ItemForm({
           <Select name="kind" defaultValue={defaults?.kind ?? "raw_material"}>
             <option value="raw_material">Raw material</option>
             <option value="finished_good">Finished good</option>
-            <option value="wip">WIP</option>
           </Select>
         </Field>
 
