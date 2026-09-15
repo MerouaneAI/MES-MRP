@@ -12,7 +12,7 @@ import { FACILITY_ID } from "@/lib/constants"
 import { recordAudit } from "@/lib/audit"
 import { addMoney, multiplyMoney } from "@/lib/money"
 import { allocateFefo, Tx } from "@/lib/mrp"
-import { addQty } from "@/lib/quantity"
+
 import type { FormState } from "@/lib/types"
 
 // Core: atomic, gapless invoice number. Reusable by actions, tests, and BullMQ.
@@ -58,7 +58,7 @@ const invoiceSchema = z.object({
 })
 
 export async function createInvoice(_prev: FormState, formData: FormData): Promise<FormState> {
-  const gate = await authorize("operator")
+  const gate = await authorize("invoices", "write")
   if (!gate.ok) return gate
 
   const parsed = invoiceSchema.safeParse({ partyId: formData.get("partyId") })
@@ -91,7 +91,7 @@ async function updateInvoiceTotal(tx: Tx, invoiceId: string) {
 }
 
 export async function addInvoiceLine(invoiceId: string, _prev: FormState, formData: FormData): Promise<FormState> {
-  const gate = await authorize("operator")
+  const gate = await authorize("invoices", "write")
   if (!gate.ok) return gate
 
   const parsed = lineSchema.safeParse({
@@ -123,7 +123,7 @@ export async function addInvoiceLine(invoiceId: string, _prev: FormState, formDa
 }
 
 export async function removeInvoiceLine(formData: FormData): Promise<void> {
-  const gate = await authorize("operator")
+  const gate = await authorize("invoices", "write")
   if (!gate.ok) throw new Error(gate.error)
 
   const lineId = String(formData.get("lineId") ?? "")
@@ -143,7 +143,7 @@ export async function removeInvoiceLine(formData: FormData): Promise<void> {
 // ---------- 3. Lifecycle (Issue, Deliver, Return) ----------
 
 export async function issueInvoice(formData: FormData): Promise<void> {
-  const gate = await authorize("operator")
+  const gate = await authorize("invoices", "write")
   if (!gate.ok) throw new Error(gate.error)
 
   const invoiceId = String(formData.get("invoiceId") ?? "")
@@ -167,7 +167,7 @@ export async function issueInvoice(formData: FormData): Promise<void> {
 }
 
 export async function deliverInvoice(formData: FormData): Promise<void> {
-  const gate = await authorize("operator")
+  const gate = await authorize("invoices", "write")
   if (!gate.ok) throw new Error(gate.error)
 
   const invoiceId = String(formData.get("invoiceId") ?? "")
@@ -212,16 +212,16 @@ export async function deliverInvoice(formData: FormData): Promise<void> {
         summary: `Delivered invoice ${inv.invoiceNo} and deducted inventory`,
       })
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     // If FEFO fails (e.g. insufficient stock), the whole transaction rolls back!
-    throw new Error(`Delivery failed: ${error.message}`)
+    throw new Error(`Delivery failed: ${(error as Error).message}`)
   }
   revalidatePath(`/invoices/${invoiceId}`)
   revalidatePath("/invoices")
 }
 
 export async function returnInvoice(formData: FormData): Promise<void> {
-  const gate = await authorize("operator")
+  const gate = await authorize("invoices", "write")
   if (!gate.ok) throw new Error(gate.error)
 
   const invoiceId = String(formData.get("invoiceId") ?? "")

@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs"
+import { eq } from "drizzle-orm"
 import { db } from "@/db"
-import { users } from "@/db/schema/auth"
+import { users, roles } from "@/db/schema/auth"
 import { parties } from "@/db/schema/parties"
 import { invoiceCounters } from "@/db/schema/invoices"
 import { items, lots } from "@/db/schema/inventory"
@@ -10,10 +11,13 @@ import { purchaseOrders, purchaseOrderLines } from "@/db/schema/purchases"
 const FACILITY_ID = "00000000-0000-0000-0000-000000000001"
 
 async function main() {
+  const [adminRole] = await db.select().from(roles).where(eq(roles.name, "admin"))
+  if (!adminRole) throw new Error("Admin role not found. Run migration first.")
+
   // 1) Admin user (idempotent thanks to unique email)
   const passwordHash = await bcrypt.hash("ChangeMe123!", 10)
   await db.insert(users).values({
-    name: "Admin", email: "admin@factory.local", passwordHash, role: "admin",
+    name: "Admin", email: "admin@factory.local", passwordHash, roleId: adminRole.id,
   }).onConflictDoNothing({ target: users.email })
 
   // 2) Parties

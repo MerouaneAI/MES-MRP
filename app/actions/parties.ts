@@ -52,7 +52,7 @@ export async function createParty(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  const gate = await authorize("operator")
+  const gate = await authorize("parties", "write")
   if (!gate.ok) return gate
 
   const parsed = parsePartyForm(formData)
@@ -75,7 +75,7 @@ export async function updateParty(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  const gate = await authorize("operator")
+  const gate = await authorize("parties", "write")
   if (!gate.ok) return gate
 
   const parsed = parsePartyForm(formData)
@@ -94,7 +94,7 @@ export async function updateParty(
 }
 
 export async function deleteParty(formData: FormData): Promise<void> {
-  const gate = await authorize("admin")
+  const gate = await authorize("parties", "delete")
   if (!gate.ok) throw new Error(gate.error)
 
   const id = String(formData.get("id") ?? "")

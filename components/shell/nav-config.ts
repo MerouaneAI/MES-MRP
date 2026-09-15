@@ -4,34 +4,34 @@ import {
   Layers, ClipboardList, Factory, Files, Replace,
   ShieldCheck, ScrollText, CircleUser, type LucideIcon,
 } from "lucide-react"
-import type { Role } from "@/lib/roles"
+import type { PageKey } from "@/lib/roles"
 
-export type NavItem = { label: string; href: string; icon: LucideIcon; minRole: Role }
+export type NavItem = { label: string; href: string; icon: LucideIcon; page: PageKey }
 export type NavSection = { heading: string; items: NavItem[] }
 
 export const NAV: NavSection[] = [
   {
     heading: "Operations",
     items: [
-      { label: "Dashboard",   href: "/dashboard",   icon: LayoutDashboard, minRole: "viewer" },
-      { label: "Parties",     href: "/parties",     icon: Users,           minRole: "viewer" },
-      { label: "Items",       href: "/items",       icon: Package,         minRole: "viewer" },
-      { label: "Inventory",   href: "/lots",        icon: Boxes,           minRole: "viewer" },
-      { label: "Purchasing",  href: "/purchasing",  icon: ShoppingCart,    minRole: "viewer" },
-      { label: "Invoices",    href: "/invoices",    icon: FileText,        minRole: "viewer" },
-      { label: "BOMs",        href: "/boms",        icon: Layers,          minRole: "viewer" },
-      { label: "Work Orders", href: "/work-orders", icon: ClipboardList,   minRole: "viewer" },
-      { label: "Shop Floor",  href: "/shopfloor",   icon: Factory,         minRole: "viewer" },
-      { label: "Documents",   href: "/documents",   icon: Files,           minRole: "viewer" },
-      { label: "ECOs",        href: "/eco",         icon: Replace,         minRole: "viewer" },
+      { label: "Dashboard",   href: "/dashboard",   icon: LayoutDashboard, page: "dashboard" },
+      { label: "Parties",     href: "/parties",     icon: Users,           page: "parties" },
+      { label: "Items",       href: "/items",       icon: Package,         page: "items" },
+      { label: "Inventory",   href: "/lots",        icon: Boxes,           page: "lots" },
+      { label: "Purchasing",  href: "/purchasing",  icon: ShoppingCart,    page: "purchasing" },
+      { label: "Invoices",    href: "/invoices",    icon: FileText,        page: "invoices" },
+      { label: "BOMs",        href: "/boms",        icon: Layers,          page: "boms" },
+      { label: "Work Orders", href: "/work-orders", icon: ClipboardList,   page: "work-orders" },
+      { label: "Shop Floor",  href: "/shopfloor",   icon: Factory,         page: "shopfloor" },
+      { label: "Documents",   href: "/documents",   icon: Files,           page: "documents" },
+      { label: "ECOs",        href: "/eco",         icon: Replace,         page: "eco" },
     ],
   },
   {
     heading: "Administration",
     items: [
-      { label: "Users",   href: "/users",   icon: ShieldCheck, minRole: "admin"  },
-      { label: "Audit",   href: "/audit",   icon: ScrollText,  minRole: "admin"  },
-      { label: "Account", href: "/account", icon: CircleUser,  minRole: "viewer" },
+      { label: "Users",   href: "/users",   icon: ShieldCheck, page: "users" },
+      { label: "Audit",   href: "/audit",   icon: ScrollText,  page: "audit" },
+      { label: "Account", href: "/account", icon: CircleUser,  page: "account" },
     ],
   },
 ]

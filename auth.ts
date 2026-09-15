@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs"
 import { eq } from "drizzle-orm"
 import { db } from "@/db"
 import { users } from "@/db/schema/auth"
+import { roles } from "@/db/schema/roles"
 import { rateLimit, resetRateLimit } from "@/lib/rate-limit"
 import "@/lib/env" // Trap #9: validate config before anything else
 
@@ -22,28 +23,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const gate = await rateLimit(`login:${email}`, 5, 300)
         if (!gate.ok) throw new Error("Too many attempts. Wait a few minutes and try again.")
 
-        const [user] = await db.select().from(users).where(eq(users.email, email))
-        if (!user?.passwordHash || !user.isActive) return null // deactivated users can't log in
+        const [user] = await db
+          .select({
+            id: users.id, name: users.name, email: users.email,
+            passwordHash: users.passwordHash, isActive: users.isActive,
+            roleId: users.roleId, roleName: roles.name,
+          })
+          .from(users)
+          .innerJoin(roles, eq(users.roleId, roles.id))
+          .where(eq(users.email, email))
+        if (!user?.passwordHash || !user.isActive) return null
         const valid = await bcrypt.compare(password, user.passwordHash)
         if (!valid) return null
 
-        await resetRateLimit(`login:${email}`) // clear the counter on success
-        return { id: user.id, name: user.name, email: user.email, role: user.role }
+        await resetRateLimit(`login:${email}`)
+        return { id: user.id, name: user.name, email: user.email, roleId: user.roleId, roleName: user.roleName }
       },
     }),
   ],
   callbacks: {
     jwt({ token, user }) {
       if (user) {
-        token.role = (user as { role?: string }).role
+        token.roleId = (user as { roleId?: string }).roleId
+        token.roleName = (user as { roleName?: string }).roleName
         token.uid = (user as { id?: string }).id
       }
       return token
     },
     session({ session, token }) {
       if (session.user) {
-        ;(session.user as { id?: unknown }).id = token.uid ?? token.sub // Trap #12
-        ;(session.user as { role?: unknown }).role = token.role
+        ;(session.user as { id?: unknown }).id = token.uid ?? token.sub
+        ;(session.user as { roleId?: unknown }).roleId = token.roleId
+        ;(session.user as { roleName?: unknown }).roleName = token.roleName
       }
       return session
     },

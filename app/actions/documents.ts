@@ -8,7 +8,7 @@ import { FACILITY_ID } from "@/lib/constants"
 import { documentsQueue } from "@/lib/queue"
 
 export async function enqueuePoPdf(formData: FormData): Promise<void> {
-  const gate = await authorize("operator")
+  const gate = await authorize("documents", "write")
   if (!gate.ok) throw new Error(gate.error)
 
   const poId = String(formData.get("poId") ?? "")
@@ -23,7 +23,7 @@ export async function enqueuePoPdf(formData: FormData): Promise<void> {
 }
 
 export async function enqueueCoaPdf(formData: FormData): Promise<void> {
-  const gate = await authorize("operator")
+  const gate = await authorize("documents", "write")
   if (!gate.ok) throw new Error(gate.error)
 
   const lotId = String(formData.get("lotId") ?? "")

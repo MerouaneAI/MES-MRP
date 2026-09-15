@@ -1,12 +1,12 @@
 // app/purchasing/page.tsx
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { desc, eq, ilike } from "drizzle-orm"
 import { ShoppingCart } from "lucide-react"
 import { db } from "@/db"
 import { purchaseOrders } from "@/db/schema/purchases"
 import { parties } from "@/db/schema/parties"
-import { currentUser } from "@/lib/session"
-import { can } from "@/lib/authz"
+import { authorize } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
   StatusBadge, EmptyState, buttonClass, SearchInput,
@@ -17,8 +17,10 @@ export const dynamic = "force-dynamic"
 
 export default async function PurchasingPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q } = await searchParams
-  const user = await currentUser()
-  const canWrite = !!user && can(user.role, "operator")
+  
+  const gate = await authorize("purchasing", "view")
+  if (!gate.ok) redirect("/forbidden")
+  const canWrite = gate.permission?.canWrite ?? false
   
   const query = db
     .select({

@@ -17,7 +17,7 @@ const bomSchema = z.object({
 })
 
 export async function createBom(_prev: FormState, formData: FormData): Promise<FormState> {
-  const gate = await authorize("operator")
+  const gate = await authorize("boms", "write")
   if (!gate.ok) return gate
 
   const parsed = bomSchema.safeParse({
@@ -55,7 +55,7 @@ const lineSchema = z.object({
 })
 
 export async function addBomLine(bomId: string, _prev: FormState, formData: FormData): Promise<FormState> {
-  const gate = await authorize("operator")
+  const gate = await authorize("boms", "write")
   if (!gate.ok) return gate
 
   const parsed = lineSchema.safeParse({
@@ -82,7 +82,7 @@ export async function addBomLine(bomId: string, _prev: FormState, formData: Form
 }
 
 export async function removeBomLine(formData: FormData): Promise<void> {
-  const gate = await authorize("operator")
+  const gate = await authorize("boms", "write")
   if (!gate.ok) throw new Error(gate.error)
 
   const lineId = String(formData.get("lineId") ?? "")
@@ -99,7 +99,7 @@ export async function removeBomLine(formData: FormData): Promise<void> {
 // Activate a DRAFT BOM. Only for the FIRST version (no active exists yet).
 // Changing an already-active recipe must go through an ECO.
 export async function activateBom(formData: FormData): Promise<void> {
-  const gate = await authorize("admin", { fresh: true })
+  const gate = await authorize("boms", "write")
   if (!gate.ok) throw new Error(gate.error)
 
   const bomId = String(formData.get("bomId") ?? "")
@@ -125,7 +125,7 @@ export async function activateBom(formData: FormData): Promise<void> {
 
 // Reactivate an ARCHIVED BOM. This archives the currently active one (if any) and activates the chosen one.
 export async function reactivateBom(formData: FormData): Promise<void> {
-  const gate = await authorize("admin", { fresh: true })
+  const gate = await authorize("boms", "write")
   if (!gate.ok) throw new Error(gate.error)
 
   const bomId = String(formData.get("bomId") ?? "")

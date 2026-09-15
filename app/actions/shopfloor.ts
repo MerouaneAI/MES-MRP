@@ -7,7 +7,7 @@ import { items, lots } from "@/db/schema/inventory"
 import type { ScanResult } from "@/lib/types"
 
 export async function scanBarcode(_prev: ScanResult | null, formData: FormData): Promise<ScanResult> {
-  const gate = await authorize("operator")
+  const gate = await authorize("shopfloor", "write")
   if (!gate.ok) return { ok: false, error: gate.error }
 
   const code = String(formData.get("code") ?? "").trim()

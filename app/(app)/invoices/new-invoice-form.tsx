@@ -3,7 +3,7 @@
 import { useActionState } from "react"
 import { createInvoice } from "@/app/actions/invoices"
 import type { FormState } from "@/lib/types"
-import { Field, Input, Select, Button, Card } from "@/components/ui"
+import { Field, Select, Button, Card } from "@/components/ui"
 
 export function NewInvoiceForm({ customers }: { customers: { id: string; name: string }[] }) {
   const [state, formAction, pending] = useActionState<FormState, FormData>(createInvoice, null)

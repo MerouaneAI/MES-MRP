@@ -5,7 +5,7 @@ import { createUser } from "@/app/actions/users"
 import type { FormState } from "@/lib/types"
 import { Field, Input, Select, Button, Card } from "@/components/ui"
 
-export function CreateUserForm() {
+export function CreateUserForm({ roles }: { roles: { id: string; name: string }[] }) {
   const [state, formAction, pending] = useActionState<FormState, FormData>(createUser, null)
   const fieldErrors = state && !state.ok ? state.fieldErrors : undefined
   return (
@@ -22,10 +22,10 @@ export function CreateUserForm() {
         </Field>
 
         <Field label="Role">
-          <Select name="role" defaultValue="operator">
-            <option value="viewer">Viewer</option>
-            <option value="operator">Operator</option>
-            <option value="admin">Admin</option>
+          <Select name="roleId" required>
+            {roles.map(r => (
+              <option key={r.id} value={r.id}>{r.name}</option>
+            ))}
           </Select>
         </Field>
 

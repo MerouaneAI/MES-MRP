@@ -1,11 +1,11 @@
 import Link from "next/link"
-import { asc, eq, ilike, or } from "drizzle-orm"
+import { redirect } from "next/navigation"
+import { asc, eq, ilike, or, inArray, and } from "drizzle-orm"
 import { Boxes } from "lucide-react"
 import { db } from "@/db"
 import { lots, items } from "@/db/schema/inventory"
 import { deleteLot } from "@/app/actions/lots"
-import { currentUser } from "@/lib/session"
-import { can } from "@/lib/authz"
+import { authorize } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
   EmptyState, Button, buttonClass, SearchInput, SelectFilter,
@@ -25,9 +25,12 @@ function expiryBadge(expiresAt: string | null) {
 
 export default async function LotsPage({ searchParams }: { searchParams: Promise<{ q?: string, kind?: "raw_material" | "finished_good" }> }) {
   const { q, kind } = await searchParams
-  const user = await currentUser()
-  const canWrite = !!user && can(user.role, "operator")
-  const canDelete = !!user && can(user.role, "admin")
+  
+  const gate = await authorize("lots", "view")
+  if (!gate.ok) redirect("/forbidden")
+  const canWrite = gate.permission?.canWrite ?? false
+  const canDelete = gate.permission?.canDelete ?? false
+  const dataFilter = gate.permission?.dataFilter
   // FEFO: earliest expiry first. Postgres sorts NULLs LAST on ASC, so no-expiry
   // lots are consumed last — exactly what we want.
   const query = db
@@ -44,11 +47,19 @@ export default async function LotsPage({ searchParams }: { searchParams: Promise
     .from(lots)
     .innerJoin(items, eq(lots.itemId, items.id))
 
+  const filters: import("drizzle-orm").SQL[] = []
+  if (dataFilter?.itemKind && dataFilter.itemKind.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    filters.push(inArray(items.kind, dataFilter.itemKind as any))
+  }
   if (q) {
-    query.where(or(ilike(lots.lotNumber, `%${q}%`), ilike(items.name, `%${q}%`), ilike(items.sku, `%${q}%`)))
+    filters.push(or(ilike(lots.lotNumber, `%${q}%`), ilike(items.name, `%${q}%`), ilike(items.sku, `%${q}%`))!)
   }
   if (kind) {
-    query.where(eq(items.kind, kind))
+    filters.push(eq(items.kind, kind))
+  }
+  if (filters.length > 0) {
+    query.where(and(...filters))
   }
 
   const rows = await query.orderBy(asc(lots.expiresAt))

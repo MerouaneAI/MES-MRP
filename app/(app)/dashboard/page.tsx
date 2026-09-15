@@ -5,16 +5,23 @@ import {
     StatCard, Panel, LivePill, Table, THead, TH, TBody, TR, TD,
     StatusBadge, Badge, EmptyState, buttonClass,
 } from "@/components/ui"
+import { authorize } from "@/lib/authz"
 import { getDashboardData, getCharts } from "./queries"
 import { ProductionOutputChart } from "@/components/charts/production-output-chart"
 import { YieldTrendChart } from "@/components/charts/yield-trend-chart"
-import { formatDA, formatShortDate } from "@/lib/format"
+import { formatShortDate } from "@/lib/format"
 import { Reveal } from "@/components/motion/reveal"
 import { CountUp } from "@/components/motion/count-up"
 
 export const dynamic = "force-dynamic"
 
 export default async function DashboardPage() {
+    const gate = await authorize("dashboard", "view")
+    if (!gate.ok) {
+        const { redirect } = await import("next/navigation")
+        redirect("/forbidden")
+    }
+
     const d = await getDashboardData()
     const charts = await getCharts()
 

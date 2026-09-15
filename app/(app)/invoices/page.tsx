@@ -1,12 +1,12 @@
 // app/invoices/page.tsx
 import Link from "next/link"
-import { desc, eq, ilike, or } from "drizzle-orm"
+import { redirect } from "next/navigation"
+import { desc, eq, ilike, or, inArray, and } from "drizzle-orm"
 import { FileText } from "lucide-react"
 import { db } from "@/db"
 import { invoices } from "@/db/schema/invoices"
 import { parties } from "@/db/schema/parties"
-import { currentUser } from "@/lib/session"
-import { can } from "@/lib/authz"
+import { authorize } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
   EmptyState, buttonClass, SearchInput, StatusBadge, SelectFilter
@@ -17,8 +17,11 @@ export const dynamic = "force-dynamic"
 
 export default async function InvoicesPage({ searchParams }: { searchParams: Promise<{ q?: string, status?: string }> }) {
   const { q, status } = await searchParams
-  const user = await currentUser()
-  const canWrite = !!user && can(user.role, "operator")
+  
+  const gate = await authorize("invoices", "view")
+  if (!gate.ok) redirect("/forbidden")
+  const canWrite = gate.permission?.canWrite ?? false
+  const dataFilter = gate.permission?.dataFilter
   
   const query = db
     .select({
@@ -32,11 +35,21 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
     .from(invoices)
     .innerJoin(parties, eq(invoices.partyId, parties.id))
 
+  const filters: import("drizzle-orm").SQL[] = []
+  if (dataFilter?.invoiceStatus && dataFilter.invoiceStatus.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    filters.push(inArray(invoices.status, dataFilter.invoiceStatus as any))
+  }
+
   if (q) {
-    query.where(or(ilike(invoices.invoiceNo, `%${q}%`), ilike(parties.name, `%${q}%`)))
+    filters.push(or(ilike(invoices.invoiceNo, `%${q}%`), ilike(parties.name, `%${q}%`))!)
   }
   if (status) {
-    query.where(eq(invoices.status, status as any))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    filters.push(eq(invoices.status, status as any))
+  }
+  if (filters.length > 0) {
+    query.where(and(...filters))
   }
 
   const rows = await query.orderBy(desc(invoices.issuedAt))

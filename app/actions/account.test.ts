@@ -6,7 +6,7 @@ vi.mock("@/auth", () => ({ auth: vi.fn() }))
 import { changeMyPassword } from "@/app/actions/account"
 import { auth } from "@/auth"
 import { db } from "@/db"
-import { users } from "@/db/schema/auth"
+import { users, roles } from "@/db/schema/auth"
 import { eq } from "drizzle-orm"
 import bcrypt from "bcryptjs"
 
@@ -20,8 +20,9 @@ function fd(obj: Record<string, string>) {
 }
 
 beforeAll(async () => {
+  const [viewerRole] = await db.select().from(roles).where(eq(roles.name, "viewer"))
   const hash = await bcrypt.hash("originalpass123", 10)
-  const [u] = await db.insert(users).values({ name: "Acct", email, role: "viewer", passwordHash: hash }).returning()
+  const [u] = await db.insert(users).values({ name: "Acct", email, roleId: viewerRole?.id ?? "", passwordHash: hash }).returning()
   userId = u.id
   vi.mocked(auth).mockResolvedValue({ user: { id: userId, email, role: "viewer" } } as unknown as Awaited<ReturnType<typeof auth>>)
 })

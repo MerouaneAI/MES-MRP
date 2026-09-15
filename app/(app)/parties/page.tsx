@@ -1,11 +1,11 @@
 import Link from "next/link"
-import { desc, ilike, or, eq } from "drizzle-orm"
+import { redirect } from "next/navigation"
+import { desc, ilike, or, eq, inArray, and } from "drizzle-orm"
 import { Users } from "lucide-react"
 import { db } from "@/db"
 import { parties } from "@/db/schema/parties"
 import { deleteParty } from "@/app/actions/parties"
-import { currentUser } from "@/lib/session"
-import { can } from "@/lib/authz"
+import { authorize } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
   StatusBadge, EmptyState, Button, buttonClass, SearchInput, SelectFilter,
@@ -16,16 +16,29 @@ export const dynamic = "force-dynamic"
 
 export default async function PartiesPage({ searchParams }: { searchParams: Promise<{ q?: string, type?: "customer" | "supplier" | "both" }> }) {
   const { q, type } = await searchParams
-  const user = await currentUser()
-  const canWrite = !!user && can(user.role, "operator")
-  const canDelete = !!user && can(user.role, "admin")
+  
+  const gate = await authorize("parties", "view")
+  if (!gate.ok) redirect("/forbidden")
+  const canWrite = gate.permission?.canWrite ?? false
+  const canDelete = gate.permission?.canDelete ?? false
+  const dataFilter = gate.permission?.dataFilter
   
   const query = db.select().from(parties)
+  
+  const filters: import("drizzle-orm").SQL[] = []
+  if (dataFilter?.partyType && dataFilter.partyType.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    filters.push(inArray(parties.type, dataFilter.partyType as any))
+  }
+
   if (q) {
-    query.where(or(ilike(parties.name, `%${q}%`), ilike(parties.phone, `%${q}%`), ilike(parties.nif, `%${q}%`)))
+    filters.push(or(ilike(parties.name, `%${q}%`), ilike(parties.phone, `%${q}%`), ilike(parties.nif, `%${q}%`))!)
   }
   if (type) {
-    query.where(eq(parties.type, type))
+    filters.push(eq(parties.type, type))
+  }
+  if (filters.length > 0) {
+    query.where(and(...filters))
   }
   const rows = await query.orderBy(desc(parties.createdAt))
 

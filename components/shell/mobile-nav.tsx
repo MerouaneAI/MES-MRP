@@ -3,9 +3,9 @@
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
 import { SidebarContent } from "./sidebar"
-import { type Role } from "@/lib/roles"
+import { type PermissionMap } from "@/lib/roles"
 
-export function MobileNav({ role, user }: { role: Role; user: { email: string; role: string } }) {
+export function MobileNav({ permissions, user }: { permissions: PermissionMap; user: { email: string; roleName: string } }) {
   const [open, setOpen] = useState(false)
   return (
     <>
@@ -21,7 +21,7 @@ export function MobileNav({ role, user }: { role: Role; user: { email: string; r
               className="absolute right-3 top-4 z-10 grid h-8 w-8 place-items-center rounded-control text-ink-muted hover:text-ink">
               <X size={18} />
             </button>
-            <SidebarContent role={role} user={user} onNavigate={() => setOpen(false)} />
+            <SidebarContent permissions={permissions} user={user} onNavigate={() => setOpen(false)} />
           </div>
         </div>
       )}

@@ -39,7 +39,7 @@ function toColumns(v: z.infer<typeof itemSchema>) {
 }
 
 export async function createItem(_prev: FormState, formData: FormData): Promise<FormState> {
-  const gate = await authorize("operator")
+  const gate = await authorize("items", "write")
   if (!gate.ok) return gate
 
   const parsed = parseItemForm(formData)
@@ -58,7 +58,7 @@ export async function createItem(_prev: FormState, formData: FormData): Promise<
 }
 
 export async function updateItem(id: string, _prev: FormState, formData: FormData): Promise<FormState> {
-  const gate = await authorize("operator")
+  const gate = await authorize("items", "write")
   if (!gate.ok) return gate
 
   const parsed = parseItemForm(formData)
@@ -77,7 +77,7 @@ export async function updateItem(id: string, _prev: FormState, formData: FormDat
 }
 
 export async function deleteItem(formData: FormData): Promise<void> {
-  const gate = await authorize("admin")
+  const gate = await authorize("items", "delete")
   if (!gate.ok) throw new Error(gate.error)
 
   const id = String(formData.get("id") ?? "")

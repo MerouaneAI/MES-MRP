@@ -23,7 +23,7 @@ const woSchema = z.object({
 })
 
 export async function createWorkOrder(_prev: FormState, formData: FormData): Promise<FormState> {
-  const gate = await authorize("operator")
+  const gate = await authorize("work-orders", "write")
   if (!gate.ok) return gate
 
   const parsed = woSchema.safeParse({
@@ -55,8 +55,8 @@ export async function createWorkOrder(_prev: FormState, formData: FormData): Pro
 }
 
 // ---------- Release: run MRP, validate, snapshot requirements ----------
-export async function releaseWorkOrder(workOrderId: string, _prev?: FormState, _formData?: FormData): Promise<FormState> {
-  const gate = await authorize("operator")
+export async function releaseWorkOrder(workOrderId: string): Promise<FormState> {
+  const gate = await authorize("work-orders", "write")
   if (!gate.ok) return gate
 
   try {
@@ -101,8 +101,8 @@ export async function releaseWorkOrder(workOrderId: string, _prev?: FormState, _
 }
 
 // ---------- Complete: the crown jewel (atomic + idempotent) ----------
-export async function completeWorkOrder(workOrderId: string, _prev?: FormState, _formData?: FormData): Promise<FormState> {
-  const gate = await authorize("operator")
+export async function completeWorkOrder(workOrderId: string): Promise<FormState> {
+  const gate = await authorize("work-orders", "write")
   if (!gate.ok) return gate
 
   let newLotId: string | undefined
@@ -180,7 +180,7 @@ export async function completeWorkOrder(workOrderId: string, _prev?: FormState, 
 
 // ---------- Cancel (only before completion; nothing consumed yet) ----------
 export async function cancelWorkOrder(formData: FormData): Promise<void> {
-  const gate = await authorize("operator")
+  const gate = await authorize("work-orders", "write")
   if (!gate.ok) throw new Error(gate.error)
 
   const workOrderId = String(formData.get("workOrderId") ?? "")

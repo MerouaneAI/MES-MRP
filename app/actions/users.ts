@@ -6,7 +6,7 @@ import { and, eq, ne, sql } from "drizzle-orm"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
 import { db } from "@/db"
-import { users } from "@/db/schema/auth"
+import { users, roles } from "@/db/schema/auth"
 import { authorize } from "@/lib/authz"
 import { recordAudit } from "@/lib/audit"
 import type { FormState } from "@/lib/types"
@@ -14,18 +14,18 @@ import type { FormState } from "@/lib/types"
 const createUserSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(120),
   email: z.string().trim().toLowerCase().email("Enter a valid email"),
-  role: z.enum(["admin", "operator", "viewer"]),
+  roleId: z.string().uuid("Invalid role ID"),
   password: z.string().min(10, "Password must be at least 10 characters"),
 })
 
 export async function createUser(_prev: FormState, formData: FormData): Promise<FormState> {
-  const gate = await authorize("admin", { fresh: true })
+  const gate = await authorize("users", "write")
   if (!gate.ok) return gate
 
   const parsed = createUserSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
-    role: formData.get("role"),
+    roleId: formData.get("roleId"),
     password: formData.get("password"),
   })
   if (!parsed.success) {
@@ -35,11 +35,11 @@ export async function createUser(_prev: FormState, formData: FormData): Promise<
   const passwordHash = await bcrypt.hash(parsed.data.password, 10)
   try {
     const [created] = await db.insert(users).values({
-      name: parsed.data.name, email: parsed.data.email, role: parsed.data.role, passwordHash,
+      name: parsed.data.name, email: parsed.data.email, roleId: parsed.data.roleId, passwordHash,
     }).returning()
     await recordAudit(db, {
       user: gate.user, action: "user.create", entity: "user", entityId: created.id,
-      summary: `Created user ${created.email} (${created.role})`,
+      summary: `Created user ${created.email}`,
     })
   } catch {
     return { ok: false, error: "A user with this email already exists." }
@@ -54,34 +54,45 @@ async function isLastActiveAdmin(excludingUserId: string): Promise<boolean> {
   const [{ n }] = await db
     .select({ n: sql<number>`count(*)` })
     .from(users)
-    .where(and(eq(users.role, "admin"), eq(users.isActive, true), ne(users.id, excludingUserId)))
+    .innerJoin(roles, eq(users.roleId, roles.id))
+    .where(and(eq(roles.name, "admin"), eq(users.isActive, true), ne(users.id, excludingUserId)))
   return Number(n) === 0
 }
 
 export async function setUserRole(formData: FormData): Promise<void> {
-  const gate = await authorize("admin", { fresh: true })
+  const gate = await authorize("users", "write")
   if (!gate.ok) throw new Error(gate.error)
 
   const userId = String(formData.get("userId") ?? "")
-  const role = String(formData.get("role") ?? "") as "admin" | "operator" | "viewer"
-  if (!userId || !["admin", "operator", "viewer"].includes(role)) return
+  const roleId = String(formData.get("roleId") ?? "")
+  if (!userId || !roleId) return
 
-  const [target] = await db.select().from(users).where(eq(users.id, userId))
+  const [target] = await db.select({ 
+    id: users.id, 
+    email: users.email,
+    roleName: roles.name 
+  }).from(users)
+    .innerJoin(roles, eq(users.roleId, roles.id))
+    .where(eq(users.id, userId))
   if (!target) return
-  if (target.role === "admin" && role !== "admin" && (await isLastActiveAdmin(userId))) {
+
+  const [newRole] = await db.select().from(roles).where(eq(roles.id, roleId))
+  if (!newRole) return
+
+  if (target.roleName === "admin" && newRole.name !== "admin" && (await isLastActiveAdmin(userId))) {
     throw new Error("You cannot remove the last remaining admin.")
   }
 
-  await db.update(users).set({ role }).where(eq(users.id, userId))
+  await db.update(users).set({ roleId }).where(eq(users.id, userId))
   await recordAudit(db, {
     user: gate.user, action: "user.set_role", entity: "user", entityId: userId,
-    summary: `Set ${target.email} role to ${role}`,
+    summary: `Set ${target.email} role to ${newRole.name}`,
   })
   revalidatePath("/users")
 }
 
 export async function setUserActive(formData: FormData): Promise<void> {
-  const gate = await authorize("admin", { fresh: true })
+  const gate = await authorize("users", "write")
   if (!gate.ok) throw new Error(gate.error)
 
   const userId = String(formData.get("userId") ?? "")
@@ -100,7 +111,7 @@ export async function setUserActive(formData: FormData): Promise<void> {
 }
 
 export async function resetUserPassword(formData: FormData): Promise<void> {
-  const gate = await authorize("admin", { fresh: true })
+  const gate = await authorize("users", "write")
   if (!gate.ok) throw new Error(gate.error)
 
   const userId = String(formData.get("userId") ?? "")

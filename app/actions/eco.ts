@@ -18,7 +18,7 @@ const ecoSchema = z.object({
 })
 
 export async function createEco(_prev: FormState, formData: FormData): Promise<FormState> {
-  const gate = await authorize("admin", { fresh: true })
+  const gate = await authorize("eco", "write")
   if (!gate.ok) return gate
 
   const parsed = ecoSchema.safeParse({
@@ -54,7 +54,7 @@ export async function createEco(_prev: FormState, formData: FormData): Promise<F
 // Apply: archive the current active version and activate the target, atomically.
 // The conditional flip on the ECO row makes it idempotent.
 export async function applyEco(formData: FormData): Promise<void> {
-  const gate = await authorize("admin", { fresh: true })
+  const gate = await authorize("eco", "write")
   if (!gate.ok) throw new Error(gate.error)
 
   const ecoId = String(formData.get("ecoId") ?? "")
@@ -82,7 +82,7 @@ export async function applyEco(formData: FormData): Promise<void> {
 }
 
 export async function cancelEco(formData: FormData): Promise<void> {
-  const gate = await authorize("admin", { fresh: true })
+  const gate = await authorize("eco", "write")
   if (!gate.ok) throw new Error(gate.error)
 
   const ecoId = String(formData.get("ecoId") ?? "")

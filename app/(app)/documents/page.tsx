@@ -5,8 +5,8 @@ import { documents } from "@/db/schema/documents"
 import { purchaseOrders } from "@/db/schema/purchases"
 import { lots } from "@/db/schema/inventory"
 import { enqueuePoPdf, enqueueCoaPdf } from "@/app/actions/documents"
-import { currentUser } from "@/lib/session"
-import { can } from "@/lib/authz"
+import { authorize } from "@/lib/authz"
+import { redirect } from "next/navigation"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
   Badge, StatusBadge, EmptyState, Field, Select, Button, buttonClass, SearchInput,
@@ -17,8 +17,10 @@ export const dynamic = "force-dynamic"
 
 export default async function DocumentsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q } = await searchParams
-  const user = await currentUser()
-  const canWrite = !!user && can(user.role, "operator")
+  
+  const gate = await authorize("documents", "view")
+  if (!gate.ok) redirect("/forbidden")
+  const canWrite = gate.permission?.canWrite ?? false
   
   const query = db.select().from(documents)
   if (q) {

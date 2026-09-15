@@ -4,12 +4,12 @@ import Link from "next/link"
 import { Crown } from "lucide-react"
 import { NAV } from "./nav-config"
 import { NavLink } from "./nav-link"
-import { can, type Role } from "@/lib/roles"
+import { canAccess, type PermissionMap } from "@/lib/roles"
 
-type ShellUser = { email: string; role: string }
+type ShellUser = { email: string; roleName: string }
 
-export function SidebarContent({ role, user, onNavigate }: {
-  role: Role; user: ShellUser; onNavigate?: () => void
+export function SidebarContent({ permissions, user, onNavigate }: {
+  permissions: PermissionMap; user: ShellUser; onNavigate?: () => void
 }) {
   return (
     <div className="flex h-full flex-col bg-sidebar">
@@ -25,7 +25,7 @@ export function SidebarContent({ role, user, onNavigate }: {
 
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-2">
         {NAV.map((section) => {
-          const items = section.items.filter((i) => can(role, i.minRole))
+          const items = section.items.filter((i) => canAccess(permissions, i.page, "view"))
           if (items.length === 0) return null
           return (
             <div key={section.heading}>
@@ -47,7 +47,7 @@ export function SidebarContent({ role, user, onNavigate }: {
           </span>
           <span className="min-w-0 leading-tight">
             <span className="block truncate text-sm text-ink">{user.email}</span>
-            <span className="block text-xs capitalize text-ink-faint">{user.role}</span>
+            <span className="block text-xs capitalize text-ink-faint">{user.roleName}</span>
           </span>
         </div>
       </div>
@@ -55,11 +55,11 @@ export function SidebarContent({ role, user, onNavigate }: {
   )
 }
 
-export function Sidebar({ role, user }: { role: Role; user: ShellUser }) {
+export function Sidebar({ permissions, user }: { permissions: PermissionMap; user: ShellUser }) {
   return (
     <aside className="hidden w-[260px] shrink-0 border-r border-line lg:block">
       <div className="sticky top-0 h-screen">
-        <SidebarContent role={role} user={user} />
+        <SidebarContent permissions={permissions} user={user} />
       </div>
     </aside>
   )

@@ -20,7 +20,7 @@ const poSchema = z.object({
 })
 
 export async function createPurchaseOrder(_prev: FormState, formData: FormData): Promise<FormState> {
-  const gate = await authorize("operator")
+  const gate = await authorize("purchasing", "write")
   if (!gate.ok) return gate
 
   const parsed = poSchema.safeParse({
@@ -51,7 +51,7 @@ const lineSchema = z.object({
 })
 
 export async function addPurchaseOrderLine(poId: string, _prev: FormState, formData: FormData): Promise<FormState> {
-  const gate = await authorize("operator")
+  const gate = await authorize("purchasing", "write")
   if (!gate.ok) return gate
 
   const parsed = lineSchema.safeParse({
@@ -90,7 +90,7 @@ export async function addPurchaseOrderLine(poId: string, _prev: FormState, formD
 }
 
 export async function removePurchaseOrderLine(formData: FormData): Promise<void> {
-  const gate = await authorize("operator")
+  const gate = await authorize("purchasing", "write")
   if (!gate.ok) throw new Error(gate.error)
 
   const lineId = String(formData.get("lineId") ?? "")
@@ -111,7 +111,7 @@ export async function removePurchaseOrderLine(formData: FormData): Promise<void>
 
 // ---------- State machine: draft -> ordered -> received ----------
 export async function markOrdered(formData: FormData): Promise<void> {
-  const gate = await authorize("operator")
+  const gate = await authorize("purchasing", "write")
   if (!gate.ok) throw new Error(gate.error)
 
   const poId = String(formData.get("poId") ?? "")
@@ -128,7 +128,7 @@ export async function markOrdered(formData: FormData): Promise<void> {
 
 // The important one: receiving CREATES inventory lots, transactionally + idempotently.
 export async function receivePurchaseOrder(formData: FormData): Promise<void> {
-  const gate = await authorize("operator")
+  const gate = await authorize("purchasing", "write")
   if (!gate.ok) throw new Error(gate.error)
 
   const poId = String(formData.get("poId") ?? "")

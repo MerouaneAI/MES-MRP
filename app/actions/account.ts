@@ -15,7 +15,7 @@ const schema = z.object({
 })
 
 export async function changeMyPassword(_prev: FormState, formData: FormData): Promise<FormState> {
-  const gate = await authorize("viewer") // any signed-in user
+  const gate = await authorize("account", "write")
   if (!gate.ok) return gate
 
   const parsed = schema.safeParse({

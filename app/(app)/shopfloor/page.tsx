@@ -1,20 +1,21 @@
 import { asc, eq, inArray } from "drizzle-orm"
+import { redirect } from "next/navigation"
 import { Factory } from "lucide-react"
 import { db } from "@/db"
 import { workOrders, workOrderMaterials } from "@/db/schema/production"
 import { items } from "@/db/schema/inventory"
 import { DispatchBoardLive } from "./dispatch-board-live"
 import { ScanForm } from "./scan-form"
-import { currentUser } from "@/lib/session"
-import { can } from "@/lib/authz"
+import { authorize } from "@/lib/authz"
 import { PageHeader, EmptyState } from "@/components/ui"
 import { Reveal } from "@/components/motion/reveal"
 
 export const dynamic = "force-dynamic"
 
 export default async function ShopFloorPage() {
-  const user = await currentUser()
-  const canWrite = !!user && can(user.role, "operator")
+  const gate = await authorize("shopfloor", "view")
+  if (!gate.ok) redirect("/forbidden")
+  const canWrite = gate.permission?.canWrite ?? false
 
   // The board = everything currently released (on the floor).
   const released = await db

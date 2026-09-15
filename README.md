@@ -38,7 +38,7 @@ Manage production, inventory, purchasing, invoicing, and quality — all from on
 | **🔧 ECOs** | Engineering Change Orders for BOM revisions with full audit trail |
 | **🏪 Shop Floor** | Barcode scanning for lot/SKU lookup, real-time SSE streaming |
 | **📄 Documents** | Background PDF generation via BullMQ worker |
-| **👤 User Management** | Role-based access control (Admin / Operator / Viewer) |
+| **👤 User Management** | Dynamic RBAC with custom roles, granular permissions, and data-level filters |
 | **📝 Audit Log** | Every mutation is recorded with user, timestamp, and metadata |
 
 ## 📸 Screenshots
@@ -69,6 +69,9 @@ Manage production, inventory, purchasing, invoicing, and quality — all from on
 
 ### Parties Directory
 ![Parties](docs/screenshots/parties.png)
+
+### Users Administration
+![Users](docs/screenshots/users.png)
 
 </details>
 
@@ -235,7 +238,7 @@ npm run lint
 ## 🔐 Security
 
 - **Authentication:** NextAuth v5 with Credentials provider, bcrypt password hashing, JWT sessions
-- **Authorization:** Three-tier RBAC (Admin > Operator > Viewer) with server-side enforcement
+- **Authorization:** Dynamic RBAC (built-in + custom roles) with granular page permissions and data-level filtering, enforced server-side
 - **Rate Limiting:** Redis-backed login throttling (5 attempts per 15 minutes per email)
 - **Input Validation:** Zod schemas on every server action
 - **CSRF Protection:** Built-in via Next.js Server Actions

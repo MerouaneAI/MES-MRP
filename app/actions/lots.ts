@@ -38,7 +38,7 @@ function toColumns(v: z.infer<typeof lotSchema>) {
 }
 
 export async function createLot(_prev: FormState, formData: FormData): Promise<FormState> {
-  const gate = await authorize("operator")
+  const gate = await authorize("lots", "write")
   if (!gate.ok) return gate
 
   const parsed = parseLotForm(formData)
@@ -52,7 +52,7 @@ export async function createLot(_prev: FormState, formData: FormData): Promise<F
 }
 
 export async function updateLot(id: string, _prev: FormState, formData: FormData): Promise<FormState> {
-  const gate = await authorize("operator")
+  const gate = await authorize("lots", "write")
   if (!gate.ok) return gate
 
   const parsed = parseLotForm(formData)
@@ -66,7 +66,7 @@ export async function updateLot(id: string, _prev: FormState, formData: FormData
 }
 
 export async function deleteLot(formData: FormData): Promise<void> {
-  const gate = await authorize("admin")
+  const gate = await authorize("lots", "delete")
   if (!gate.ok) throw new Error(gate.error)
 
   const id = String(formData.get("id") ?? "")
@@ -80,13 +80,13 @@ export async function deleteLot(formData: FormData): Promise<void> {
 }
 
 export async function bulkUpdateLots(_prev: FormState, formData: FormData): Promise<FormState> {
-  const gate = await authorize("operator")
+  const gate = await authorize("lots", "write")
   if (!gate.ok) return gate
 
   const lotIds = formData.getAll("lot_id").map(String)
   if (lotIds.length === 0) return { ok: false, error: "No lots to update." }
 
-  const updates: { id: string, data: any }[] = []
+  const updates: { id: string, data: Record<string, unknown> }[] = []
   for (const id of lotIds) {
     const parsed = lotSchema.safeParse({
       itemId: formData.get(`lot_itemId_${id}`),

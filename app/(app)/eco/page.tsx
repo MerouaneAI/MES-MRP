@@ -1,12 +1,12 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { desc, eq, ilike, or } from "drizzle-orm"
 import { GitBranch } from "lucide-react"
 import { db } from "@/db"
 import { engineeringChangeOrders, boms } from "@/db/schema/production"
 import { items } from "@/db/schema/inventory"
 import { applyEco, cancelEco } from "@/app/actions/eco"
-import { currentUser } from "@/lib/session"
-import { can } from "@/lib/authz"
+import { authorize } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
   StatusBadge, EmptyState, Button, buttonClass, SearchInput,
@@ -17,8 +17,10 @@ export const dynamic = "force-dynamic"
 
 export default async function EcoPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q } = await searchParams
-  const user = await currentUser()
-  const isAdmin = !!user && can(user.role, "admin")
+  
+  const gate = await authorize("eco", "view")
+  if (!gate.ok) redirect("/forbidden")
+  const isAdmin = gate.user.roleName === "admin"
   
   const query = db
     .select({

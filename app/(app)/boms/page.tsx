@@ -1,12 +1,12 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { reactivateBom } from "@/app/actions/boms"
 import { desc, eq, ilike, or } from "drizzle-orm"
 import { ClipboardList } from "lucide-react"
 import { db } from "@/db"
 import { boms } from "@/db/schema/production"
 import { items } from "@/db/schema/inventory"
-import { currentUser } from "@/lib/session"
-import { can } from "@/lib/authz"
+import { authorize } from "@/lib/authz"
 import {
   PageHeader, Table, THead, TH, TBody, TR, TD,
   StatusBadge, EmptyState, buttonClass, SearchInput, Button,
@@ -17,9 +17,11 @@ export const dynamic = "force-dynamic"
 
 export default async function BomsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q } = await searchParams
-  const user = await currentUser()
-  const canWrite = !!user && can(user.role, "operator")
-  const isAdmin = !!user && can(user.role, "admin")
+  
+  const gate = await authorize("boms", "view")
+  if (!gate.ok) redirect("/forbidden")
+  const canWrite = gate.permission?.canWrite ?? false
+  const isAdmin = gate.user.roleName === "admin"
   
   const query = db
     .select({ id: boms.id, version: boms.version, status: boms.status, productName: items.name, productSku: items.sku })

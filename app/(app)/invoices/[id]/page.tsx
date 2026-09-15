@@ -48,7 +48,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="space-y-6">
-      <a href="/invoices" className={buttonClass({ variant: "ghost", size: "sm" })}>← Back to invoices</a>
+      <Link href="/invoices" className={buttonClass({ variant: "ghost", size: "sm" })}>← Back to invoices</Link>
       <PageHeader
         title={`Invoice ${invoice.invoiceNo}`}
         description={`Customer: ${customer?.name ?? "—"} · Total: ${invoice.totalAmount} DZD`}

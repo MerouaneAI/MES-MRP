@@ -49,8 +49,8 @@ afterEach(async () => {
 describe("completeWorkOrder", () => {
   it("consumes FEFO, makes one output lot, writes genealogy, and is idempotent", async () => {
     await setup(["10.000", "100.000"]) // needs 20 kg for 10 units -> 10 early + 10 late
-    await releaseWorkOrder(woId, null, new FormData())
-    const first = await completeWorkOrder(woId, null, new FormData())
+    await releaseWorkOrder(woId)
+    const first = await completeWorkOrder(woId)
     expect(first).toEqual({ ok: true })
 
     const outputs = await db.select().from(lots).where(eq(lots.itemId, productId))
@@ -70,7 +70,7 @@ describe("completeWorkOrder", () => {
     expect(wo.quantityProduced).toBe("10.000")
 
     // idempotent: a second complete changes nothing
-    await completeWorkOrder(woId, null, new FormData())
+    await completeWorkOrder(woId)
     const outputs2 = await db.select().from(lots).where(eq(lots.itemId, productId))
     expect(outputs2).toHaveLength(1)
     const gen2 = await db.select().from(lotGenealogy).where(eq(lotGenealogy.outputLotId, outputs[0].id))
@@ -79,13 +79,13 @@ describe("completeWorkOrder", () => {
 
   it("rolls back fully if stock disappears after release", async () => {
     await setup(["10.000", "100.000"])
-    await releaseWorkOrder(woId, null, new FormData())
+    await releaseWorkOrder(woId)
 
     // Simulate stock vanishing between release and completion.
     await db.update(lots).set({ quantityOnHand: "0.000" }).where(eq(lots.id, earlyLotId))
     await db.update(lots).set({ quantityOnHand: "1.000" }).where(eq(lots.id, lateLotId))
 
-    const res = await completeWorkOrder(woId, null, new FormData())
+    const res = await completeWorkOrder(woId)
     expect(res).toMatchObject({ ok: false })
 
     const outputs = await db.select().from(lots).where(eq(lots.itemId, productId))
