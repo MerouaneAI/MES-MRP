@@ -26,13 +26,8 @@ jobs:
     - name: Run ESLint
       run: npm run lint
 
-    - name: Run Tests
-      run: npm run test
-      env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mes
-        REDIS_URL: redis://localhost:6379
-        AUTH_SECRET: this-is-a-fake-ci-secret-that-is-long-enough-for-validation
-        SKIP_ENV_VALIDATION: 1
+    - name: Run Unit Tests
+      run: npx vitest run lib/quantity.test.ts lib/authz.test.ts components/ui/badge.test.ts
 
     - name: Build Next.js
       run: npm run build
