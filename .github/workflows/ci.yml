@@ -28,6 +28,11 @@ jobs:
 
     - name: Run Tests
       run: npm run test
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mes
+        REDIS_URL: redis://localhost:6379
+        AUTH_SECRET: secret
+        SKIP_ENV_VALIDATION: 1
 
     - name: Build Next.js
       run: npm run build
