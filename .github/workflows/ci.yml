@@ -32,5 +32,6 @@ jobs:
     - name: Build Next.js
       run: npm run build
       env:
-        # Provide any necessary environment variables here if required by the build
-        SKIP_ENV_VALIDATION: 1
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mes
+        REDIS_URL: redis://localhost:6379
+        AUTH_SECRET: this-is-a-fake-ci-secret-that-is-long-enough-for-validation
